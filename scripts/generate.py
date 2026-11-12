@@ -38,6 +38,8 @@ P.append(dict(key='ui_plot_mode',name='Preview mode',min=0,max=1,default=0,poll=
 # Append-only import controls; never serialized as musical numeric parameters.
 for key in ['import_open','browse_up','browse_root','browse_user','browse_prev','browse_next']+[f'browse_item{i}' for i in range(6)]+['browse_path','browse_page','import_status']:
  P.append(dict(key=key,name=key.upper(),min=0,max=1,default=0,dynamic_display=True,poll=False,momentary=key.startswith('browse_') and key not in ['browse_path','browse_page']))
+P.append(dict(key='import_phase',name='IMPORT STATUS',min=0,max=4,default=0,poll=False))
+P.append(dict(key='table_name',name='WAVETABLE',min=0,max=1,default=0,dynamic_display=True,poll=False))
 assert len(P)<=4096, 'Force native skin handles must fit indices 0..4095'
 keys=[p['key'] for p in P];lock=B/'params.lock'
 if lock.exists():assert keys[:len(old:=lock.read_text().splitlines())]==old,'parameter prefix changed'

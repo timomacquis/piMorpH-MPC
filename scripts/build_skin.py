@@ -19,8 +19,8 @@ def gate(key,v,n=2):return f'IndexedEnabling/{v}/{n}/Parameter {I[key]}'
 def art(name,x,y,w,h):
  regular_art.add(name)
  c=child('Image',dict(version=2,imageType='Regular',colour='0',image=name),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
-def label(x,y,w,h,kind='Value',n=26):
- c=child('Label',dict(version=1,textStyle=dict(version=1,font=dict(version=1,name='Titillium Web',style='Regular',height=int(n)),colour='fff1f2ed',justification='horizontallyCentred verticallyCentred',case='Original'),type=kind,handleName='Data'),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
+def label(x,y,w,h,kind='Value',n=26,ink='fff1f2ed'):
+ c=child('Label',dict(version=1,textStyle=dict(version=1,font=dict(version=1,name='Titillium Web',style='Regular',height=int(n)),colour=ink,justification='horizontallyCentred verticallyCentred',case='Original'),type=kind,handleName='Data'),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
 def action(h,event='Mouse Down'):return {'version':2,'onAction':event,'handler':h,'handleName':'Data','additionalData':'','handle remapping':{'version':1,'map':[]}}
 def local(name,parts,actions=None,focus_ring=True):
  if actions and focus_ring:
@@ -85,7 +85,7 @@ Image.new('RGB',(1280,628),BG).save(A/'background.png')
 VIOLET='#b195d7';GOLD='#c4ab70';AZURE='#83bed0';BLACK='#05080d'
 def title(text,x,y,w=540,n=24):
  fn='title_'+hashlib.sha256((text+str(w)+str(n)).encode()).hexdigest()[:14]+'.png';im=Image.new('RGB',(w,36),BG);ImageDraw.Draw(im).text((0,18),text,font=font(n),fill=INK,anchor='lm');im.save(A/fn);return art(fn,x,y,w,36)
-def readout(key,x,y,w,h,n=22):return place(local('read'+str(len(defs)),[label(0,0,w,h,n=n)]),key,x,y,w,h)
+def readout(key,x,y,w,h,n=22,ink='fff1f2ed'):return place(local('read'+str(len(defs)),[label(0,0,w,h,n=n,ink=ink)]),key,x,y,w,h)
 MODAL_BUTTON_H=36
 modal_manifest=[]
 def picker(key,titletext,x,y,w=286,h=48):
@@ -142,7 +142,10 @@ def import_panel(parts,opener):
   if not (A/fn).exists():bitmap(fn,w-48,36,'',FIELD)
   component=local('import_row'+str(row),[art(fn,0,0,w-48,36),label(12,0,w-72,36,n=26)],[action('Toggle Switch')])
   elements.append(place(component,key,x+24,y+94+row*44,w-48,36))
- elements += [readout('browse_page',x+350,y+366,220,30,24),readout('import_status',x+24,y+444,w-48,30,22)]
+ elements.append(readout('browse_page',x+350,y+366,220,30,24))
+ for phase in range(5):
+  ink='ffe96d75' if phase==4 else 'ff77c895' if phase in [2,3] else 'fff1f2ed'
+  c=readout('import_status',x+24,y+444,w-48,30,22,ink);c['bounds']['additionalInvalidatingHandles'].append(gate('import_phase',phase,5));elements.append(c)
  for key,caption,xx,ww in [('browse_root','DISKS',24,132),('browse_user','USER',168,132),('browse_up','UP',312,100),('browse_prev','PREV',424,100),('browse_next','NEXT',536,100),('import_open','CLOSE',648,248)]:
   elements.append(toggle(key,caption,x+xx,y+402,ww,36,level1=False))
  for c in elements:c['bounds']['additionalInvalidatingHandles'].extend(cond)
@@ -313,7 +316,7 @@ for page,name in enumerate(PAGES):
  parts=[art('background.png',0,0,1280,628)]
  if page==0:
   parts.append(picker('play_mode','PLAY MODE',768,553,326,48));precise_space(parts,20,92)
-  parts.append(title('ONE PASS · ORIGIN / START · PATH + ORBIT',30,514,440,18));parts.append(toggle('import_open','IMPORT',486,506,126,48));dialgrid(parts,page_keys[page])
+  parts.append(readout('table_name',30,518,440,36,22));parts.append(toggle('import_open','IMPORT',486,518,126,36,level1=False));dialgrid(parts,page_keys[page])
  elif page==1:
   parts.append(picker('path_mode','PATH MODE',768,553,326,48));precise_space(parts,20,92,True)
   parts.append(picker('point_select','POINT',20,384,120,48));parts.extend([dial('point_x','POINT X',152,380,224,110),dial('point_y','POINT Y',388,380,224,110)])

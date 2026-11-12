@@ -32768,5 +32768,22 @@
     "dynamic_display": true,
     "poll": false,
     "momentary": false
+  },
+  {
+    "key": "import_phase",
+    "name": "IMPORT STATUS",
+    "min": 0,
+    "max": 4,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "table_name",
+    "name": "WAVETABLE",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false
   }
 ]

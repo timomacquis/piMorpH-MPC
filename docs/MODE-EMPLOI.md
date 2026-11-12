@@ -53,9 +53,9 @@ Le bouton du bas choisit le jeu :
 
 ### Importer sa propre table
 
-Dans **SPACE**, touche **IMPORT**, puis choisis un WAV sur **DISKS** ou **USER**.
+Dans **SPACE**, touche **IMPORT**, puis choisis un WAV sur **DISKS** ou **USER**. Premier appui : validation, **VALID en vert**, sans changer le son. Second appui sur le même fichier : **LOADING en vert**, puis fermeture du panneau. Une erreur apparaît en rouge avec **ERROR :** ; la table actuelle reste chargée.
 
-**256 formes**, de **512, 1 024 ou 2 048 échantillons** chacune. WAV **PCM 16 bits, PCM 32 bits ou flottant 32 bits**, mono ou stéréo.
+**1 à 256 formes** avec métadonnées de cycles cohérentes, de **512, 1 024 ou 2 048 échantillons** chacune. WAV **PCM 16 bits, PCM 32 bits ou flottant 32 bits**, mono ou stéréo.
 
 La taille des formes est reconnue automatiquement. La stéréo est moyennée en mono ; le niveau est normalisé en mémoire. La fréquence indiquée dans le WAV ne change pas la hauteur de l’oscillateur.
 

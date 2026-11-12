@@ -39,4 +39,4 @@ GPL-3.0-or-later for the instrument. Original factory wavetables included with r
 
 ## Local development candidate
 
-0.1.2-candidate.1 adds disk wavetable IMPORT. See [IMPORT](docs/IMPORT.md) for supported formats, automatic adaptation and external-file persistence. This candidate has not been installed or published. The download above remains the public 0.1.1 release.
+0.1.2-candidate.2 adds disk wavetable IMPORT. See [IMPORT](docs/IMPORT.md) for supported formats, automatic adaptation and external-file persistence. This candidate has not been installed or published. The download above remains the public 0.1.1 release.

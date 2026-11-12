@@ -1,7 +1,7 @@
 from pathlib import Path
 import math
 B=Path(__file__).resolve().parents[1]
-VERSION='0.1.2-candidate.1'
+VERSION='0.1.2-candidate.2'
 FOLDER='Timo - VST - πMorpH'
 PAGES=['SPACE','MOTION','ENVELOPES','FILTER','LFO','MOD']
 WAVES=['SINE','TRIANGLE','RAMP UP','RAMP DOWN','SQUARE','SAMPLE & HOLD','RANDOM SMOOTH','FREE CURVE','RANDOM WALK','RANDOM LOOP','BOUNCE']

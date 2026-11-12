@@ -1,14 +1,16 @@
-# πMorpH 0.1.2-candidate.1 — IMPORT
+# πMorpH 0.1.2-candidate.2 — IMPORT
 
 Local Force Gen1 candidate; not installed or published.
 
 - IMPORT button in SPACE with a compact, dimmed-background disk browser and 36 px panel buttons.
-- PCM16, PCM32 and float32 WAV; mono or stereo; 256 waveforms of 512, 1024 or 2048 samples each.
-- Missing cycle metadata is inferred from PCM frame count. Conflicting metadata and incomplete tables are rejected.
+- PCM16, PCM32 and float32 WAV; mono or stereo; up to 256 waveforms of 512, 1024 or 2048 samples each.
+- Valid cycle metadata takes precedence, supporting 1–256 waveforms. The 64 × 2048 Vital-style table is accepted correctly. Metadata-free 256-frame exports retain their detection convention; incomplete or ambiguous tables are not trimmed or guessed.
+- Browser first tap validates and caches the table: VALID in green. Second tap loads it: LOADING in green, then close. Errors use ERROR : in red.
+- SPACE shows the current WAV filename and a 36 px IMPORT button with more space below the graph.
 - Stereo is averaged to mono, decoded to the internal representation and peak-normalized in memory. The WAV sample-rate field does not alter oscillator pitch; no audio resampling is applied.
 - Import preserves sound parameters and the source file. Saved presets/projects retain the absolute external path. Keep that file at the same location.
 - Loading and browser scans run on the existing worker. A failed import retains the current table. A successful change retains the existing voice-reset behavior.
-- Existing 4012 parameter indices are unchanged; 15 import/browser parameters are appended (4027 total).
+- Existing 4012 parameter indices are unchanged; 17 import/browser parameters are appended (4029 total).
 - The native bank stays at 100 sounds + INIT. Existing regular-image padding and graphics notification limits are retained.
 
 PC validation covers import formats, stereo cancellation, state persistence, failure fallback, browser navigation, latest-request wins, original factory sounds and native engine/wrapper sanitizer checks. Device UI and audio validation remain pending.

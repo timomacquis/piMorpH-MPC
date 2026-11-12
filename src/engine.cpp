@@ -31,6 +31,7 @@ constexpr int Banks=sizeof(bank_names)/sizeof(bank_names[0]);
 using Values=std::array<double,pmmeta::Count>;
 const auto& indexMap(){static const auto map=[](){std::unordered_map<std::string_view,int> m;for(int i=0;i<pmmeta::Count;i++)m.emplace(pmmeta::params[i].key,i);return m;}();return map;}
 int id(std::string_view key){auto it=indexMap().find(key);return it==indexMap().end()?-1:it->second;}
+const auto& importIndices(){static const auto a=[](){std::array<int,12>a{};const char*names[]={"import_open","import_phase","import_status","table_name","browse_path","browse_page","browse_item0","browse_item1","browse_item2","browse_item3","browse_item4","browse_item5"};for(int i=0;i<12;i++)a[i]=id(names[i]);return a;}();return a;}
 const auto& filterIndices(){static const auto indices=[](){std::array<int,FilterCodes> a{};char key[40];for(int i=0;i<FilterCodes;i++){snprintf(key,sizeof key,"filterline%d",i);a[i]=id(key);}return a;}();return indices;}
 struct PlotIndices{std::array<int,PathTiles> path{};std::array<int,192>wave{};std::array<int,PathRows>rows{};std::array<int,4>markers{};};
 const auto& plotIndices(){static const auto result=[](){PlotIndices p;char k[48];for(int i=0;i<PathTiles;i++){if(i<384)snprintf(k,sizeof k,"pathseg%d_%d",i/32,i%32);else snprintf(k,sizeof k,"pathtile%d",i);p.path[i]=id(k);}for(int i=0;i<192;i++){snprintf(k,sizeof k,i<64?"wave%d":"wavefine%d",i);p.wave[i]=id(k);}for(int i=0;i<PathRows;i++){snprintf(k,sizeof k,"pathrow%d",i);p.rows[i]=id(k);}const char*names[]={"path_start_x","path_start_y","path_selected_x","path_selected_y"};for(int i=0;i<4;i++)p.markers[i]=id(names[i]);return p;}();return result;}
@@ -38,33 +39,44 @@ const auto& draftIndices(){static const auto result=[](){std::array<int,DraftTil
 constexpr int PlotMode=PICN_PLOT_MODE_PARAM;
 struct Snapshot{Values values{};std::string external;unsigned source=1;int bank=0;unsigned revision=0;bool draft=false;};
 struct Publication{std::shared_ptr<pf::Wavetable> table;std::string external,message;unsigned source=1;TrajectoryPreview trajectory{};WavePreview waveLine{};std::array<LfoPreview,2> lfoLine{};FilterPreview filterLine{};TrajectoryDraft draftPath{};int bank=0,error=0;unsigned revision=0;bool draft=false;};
+struct ImportCheck{unsigned serial=0;bool valid=false;std::string path,message;};
 struct Instance{
  Synth synth;Values p{};std::bitset<pmmeta::Count> changed;int notifyCursor=0,bank=0;unsigned revision=1,publishedRevision=0;int loaded=-1,error=0;bool stateValid=true,wasPlaying=false;
+ std::mutex checkMutex;std::string checkPath,selectedPath;bool selectedValid=false;std::atomic<unsigned> checkSerial{0};std::atomic<bool> checkCancel{false},checkEnabled{false};std::atomic<ImportCheck*> checkReady{nullptr},checkRetired{nullptr};
  ImportBrowser browser;std::string requestedPath,externalPath,importMessage;std::atomic<unsigned> sourceSerial{1};bool importing=false;
  std::string directory;std::thread worker;std::atomic<bool> stop{false},cancel{false};std::atomic<int> desiredBank{0};
  std::mutex jobs;Snapshot snapshot;std::atomic<unsigned> requested{0};std::atomic<Publication*> ready{nullptr},retired{nullptr};Publication* active=nullptr;
  int plotQuietSamples=100000;bool editingPlot=false;
  int submittedSamples=0;double bend=0;float buffer[256]{};
- Instance(const char*dir):directory(dir?dir:"."){requestedPath.reserve(1024);externalPath.reserve(1024);snapshot.external.reserve(1024);importMessage.reserve(256);indexMap();filterIndices();plotIndices();draftIndices();for(int i=0;i<pmmeta::Count;i++)p[i]=pmmeta::params[i].def;worker=std::thread([this]{work();});}
- ~Instance(){stop=true;cancel=true;if(worker.joinable())worker.join();delete ready.exchange(nullptr);delete retired.exchange(nullptr);delete active;}
+ Instance(const char*dir):directory(dir?dir:"."){selectedPath.reserve(1024);checkPath.reserve(1024);requestedPath.reserve(1024);externalPath.reserve(1024);snapshot.external.reserve(1024);importMessage.reserve(256);indexMap();importIndices();filterIndices();plotIndices();draftIndices();for(int i=0;i<pmmeta::Count;i++)p[i]=pmmeta::params[i].def;worker=std::thread([this]{work();});}
+ ~Instance(){stop=true;cancel=true;checkCancel=true;if(worker.joinable())worker.join();delete checkReady.exchange(nullptr);delete checkRetired.exchange(nullptr);delete ready.exchange(nullptr);delete retired.exchange(nullptr);delete active;}
  double value(const char*k)const{int i=id(k);return i>=0?p[i]:0;}
  void mark(const char*k){int i=id(k);if(i>=0)changed.set(i);}
  void touch(){revision++;}
  void plotEdit(){editingPlot=true;plotQuietSamples=0;}
  bool plotField(const char*k)const{return !strcmp(k,"x")||!strcmp(k,"y")||(!strncmp(k,"path_",5))||(!strncmp(k,"orbit_",6))||(!strncmp(k,"point",5)&&strcmp(k,"point_select"));}
  bool validExternal(const std::string& path)const{return !path.empty()&&path.size()<=1024&&path[0]=='/'&&path.find_first_of("\n\r")==std::string::npos;}
- void importFile(const std::string& path){if(!validExternal(path)){importMessage="Choose an absolute WAV path";mark("import_status");return;}requestedPath=path;sourceSerial++;cancel=true;importing=true;importMessage="Loading wavetable...";mark("import_status");mark("load_status");editingPlot=false;touch();}
- void setbank(int b){bank=b;desiredBank=b;requestedPath.clear();externalPath.clear();sourceSerial++;cancel=true;error=0;importing=false;importMessage.clear();touch();mark("load_status");mark("import_status");}
+ void importStatus(const std::string& text,int phase){importMessage=phase==4?"ERROR : "+text:text;int i=id("import_phase");if(p[i]!=phase){p[i]=phase;changed.set(i);}mark("import_status");}
+ void clearSelection(){checkEnabled=false;selectedPath.clear();selectedValid=false;checkCancel=true;checkSerial++;if(!importing)importStatus("Choose a WAV to validate",0);}
+ void validateFile(const std::string& path){if(!validExternal(path)){importStatus("Choose an absolute WAV path",4);return;}
+  std::unique_lock<std::mutex>l(checkMutex,std::try_to_lock);if(!l)return;
+  selectedPath=path;selectedValid=false;checkCancel=true;checkPath=path;checkEnabled=true;checkSerial++;importStatus("CHECKING...",1);
+ }
+ void importFile(const std::string& path){if(!validExternal(path)){importStatus("Choose an absolute WAV path",4);return;}requestedPath=path;sourceSerial++;cancel=true;importing=true;selectedValid=false;importStatus("LOADING",3);mark("load_status");editingPlot=false;touch();}
+ void setbank(int b){bank=b;desiredBank=b;requestedPath.clear();externalPath.clear();sourceSerial++;cancel=true;error=0;importing=false;clearSelection();touch();mark("load_status");mark("table_name");}
  bool browserSet(const char*k,const char*v){
   if(!strcmp(k,"import_path")){importFile(v);return true;}
-  if(!strcmp(k,"browse_path_set")){browser.navigate(v);return true;}
+  if(!strcmp(k,"browse_path_set")){if(!importing){clearSelection();browser.navigate(v);}return true;}
   if(strcmp(k,"import_open")&&strncmp(k,"browse_",7))return false;
   if(!strcmp(k,"browse_path")||!strcmp(k,"browse_page"))return true;
   double x=strtod(v,nullptr);
-  if(!strcmp(k,"import_open")){p[id(k)]=x>.5;mark(k);if(x>.5)browser.reopen();return true;}
-  if(x<=.5)return true;
-  if(!strcmp(k,"browse_up"))browser.up();else if(!strcmp(k,"browse_root"))browser.navigate("/media");else if(!strcmp(k,"browse_user"))browser.navigate("/sdcard");else if(!strcmp(k,"browse_prev"))browser.step(-1);else if(!strcmp(k,"browse_next"))browser.step(1);
-  else if(strlen(k)==12&&!strncmp(k,"browse_item",11)&&k[11]>='0'&&k[11]<='5'){auto path=browser.click(k[11]-'0');if(!path.empty())importFile(path);}
+  if(!strcmp(k,"import_open")){p[id(k)]=x>.5;mark(k);if(!importing)clearSelection();if(x>.5)browser.reopen();return true;}
+  if(x<=.5||importing)return true;
+  if(!strcmp(k,"browse_up")){clearSelection();browser.up();}else if(!strcmp(k,"browse_root")){clearSelection();browser.navigate("/media");}else if(!strcmp(k,"browse_user")){clearSelection();browser.navigate("/sdcard");}else if(!strcmp(k,"browse_prev")){clearSelection();browser.step(-1);}else if(!strcmp(k,"browse_next")){clearSelection();browser.step(1);}
+  else if(strlen(k)==12&&!strncmp(k,"browse_item",11)&&k[11]>='0'&&k[11]<='5'){
+   auto path=browser.click(k[11]-'0');if(path.empty())clearSelection();
+   else if(path==selectedPath&&selectedValid)importFile(path);else if(path!=selectedPath||value("import_phase")!=1)validateFile(path);
+  }
   return true;
  }
  void apply(){auto& q=synth.patch;
@@ -111,10 +123,11 @@ struct Instance{
   if(!strcmp(k,"play_mode")||!strcmp(k,"voice_limit"))synth.panic();apply();aliasesFor(i,target);if(plotField(k))plotEdit();touch();
  }
  void submit(){if(editingPlot)return;if(publishedRevision==revision)return;if(!jobs.try_lock())return;snapshot.values=p;snapshot.bank=bank;snapshot.external=requestedPath;snapshot.source=sourceSerial.load();snapshot.revision=revision;snapshot.draft=editingPlot;requested=revision;jobs.unlock();publishedRevision=revision;}
- void consume(){if(browser.dirty.exchange(false)){mark("browse_path");mark("browse_page");for(int i=0;i<6;i++){char k[32];snprintf(k,sizeof k,"browse_item%d",i);mark(k);}}if(retired.load())return;Publication*n=ready.exchange(nullptr);if(!n)return;
+ void consume(){if(!checkRetired.load()){auto*r=checkReady.exchange(nullptr);if(r){if(r->serial==checkSerial&&r->path==selectedPath){selectedValid=r->valid;importStatus(r->valid?"VALID":r->message,r->valid?2:4);}checkRetired=r;}}
+ if(browser.dirty.exchange(false)){mark("browse_path");mark("browse_page");for(int i=0;i<6;i++){char k[32];snprintf(k,sizeof k,"browse_item%d",i);mark(k);}}if(retired.load())return;Publication*n=ready.exchange(nullptr);if(!n)return;
   if(n->bank!=bank||n->source!=sourceSerial){retired=n;return;}
-  if(n->error){error=n->error;importMessage=n->message;importing=false;requestedPath=externalPath;sourceSerial++;mark("import_status");mark("load_status");retired=n;return;}
-  if(importing){externalPath=n->external;importing=false;importMessage="Wavetable loaded";mark("import_status");p[id("import_open")]=0;mark("import_open");}
+  if(n->error){error=n->error;importing=false;importStatus(n->message,4);requestedPath=externalPath;sourceSerial++;mark("import_status");mark("load_status");retired=n;return;}
+  if(importing){externalPath=n->external;importing=false;importStatus("Loaded",0);mark("table_name");p[id("import_open")]=0;mark("import_open");}
 
   if(n->revision==revision){
    auto publish=[&](int i,double value){if(p[i]!=value){p[i]=value;changed.set(i);}};
@@ -127,7 +140,7 @@ struct Instance{
    for(int j=0;j<2;j++)for(int g=0;g<PreviewColumns;g++){char key[40];snprintf(key,sizeof key,"lfo%dline%d",j+1,g);publish(id(key),n->lfoLine[j][g]);}
   }
   int previousLoaded=loaded,previousError=error;
-  if(!active||active->bank!=n->bank||active->table.get()!=n->table.get()){synth.setTable(n->table.get());loaded=n->table?n->bank:-1;}
+  if(!active||active->bank!=n->bank||active->table.get()!=n->table.get()){synth.setTable(n->table.get());mark("table_name");loaded=n->table?n->bank:-1;}
   error=n->error;if(loaded!=previousLoaded||error!=previousError)mark("load_status");if(active)retired=active;active=n;
  }
  static void graphs(Publication&o,const Snapshot&s,const FilterPreview* filterCached=nullptr,const TrajectoryPreview* pathCached=nullptr,const WavePreview* waveCached=nullptr,TrajectoryScratch* pathScratch=nullptr,const TrajectoryDraft* draftCached=nullptr){
@@ -145,18 +158,34 @@ struct Instance{
   else{if(pathCached)o.trajectory=*pathCached;else o.trajectory=trajectoryPreview(makePatch(),(int)get("point_select"),pathScratch);o.waveLine=waveCached?*waveCached:wavePreview(o.table.get(),get("x")/100,get("y")/100);}
 
  }
- void work(){unsigned done=0;int cacheBank=-1;std::string cachePath;std::shared_ptr<pf::Wavetable> cache;std::array<double,6> filterSettings{};FilterPreview filterCache{};bool filterValid=false;std::array<double,36> pathSettings{};TrajectoryPreview pathCache;bool pathValid=false;std::array<double,36> draftSettings{};TrajectoryDraft draftCache;bool draftValid=false;std::array<double,2> waveXY{};WavePreview waveCache{};std::shared_ptr<pf::Wavetable>waveTable;bool waveValid=false;auto pathScratch=std::make_unique<TrajectoryScratch>();
-  while(!stop){delete retired.exchange(nullptr);browser.work();
+ void work(){unsigned checked=0;std::shared_ptr<pf::Wavetable> checkedTable;std::string checkedPath;std::uintmax_t checkedSize=0;std::filesystem::file_time_type checkedTime{};
+  auto fingerprint=[](const std::string&path,std::uintmax_t&size,std::filesystem::file_time_type&time){std::error_code ec;size=std::filesystem::file_size(path,ec);if(ec)return false;time=std::filesystem::last_write_time(path,ec);return !ec;};
+  unsigned cacheSource=0;unsigned done=0;int cacheBank=-1;std::string cachePath;std::shared_ptr<pf::Wavetable> cache;std::array<double,6> filterSettings{};FilterPreview filterCache{};bool filterValid=false;std::array<double,36> pathSettings{};TrajectoryPreview pathCache;bool pathValid=false;std::array<double,36> draftSettings{};TrajectoryDraft draftCache;bool draftValid=false;std::array<double,2> waveXY{};WavePreview waveCache{};std::shared_ptr<pf::Wavetable>waveTable;bool waveValid=false;auto pathScratch=std::make_unique<TrajectoryScratch>();
+  while(!stop){delete checkRetired.exchange(nullptr);delete retired.exchange(nullptr);browser.work();
+   unsigned serial=checkSerial.load();if(serial!=checked){std::string path;{std::lock_guard<std::mutex>l(checkMutex);path=checkPath;}checked=serial;
+    if(!path.empty()&&checkEnabled){checkCancel=false;auto result=std::make_unique<ImportCheck>();result->serial=serial;result->path=path;auto table=std::make_shared<pf::Wavetable>();int frame=0;std::string why;std::uintmax_t size=0;std::filesystem::file_time_type time{};
+     bool ok=fingerprint(path,size,time)&&inspectImport(path,frame,why);
+     if(ok)ok=pf::loadWavetable(path,*table,&why,&checkCancel,frame);
+     if(ok){std::uintmax_t afterSize=0;std::filesystem::file_time_type afterTime{};if(!fingerprint(path,afterSize,afterTime)||size!=afterSize||time!=afterTime){ok=false;why="File changed during validation; select it again";}}
+     if(stop)break;if(serial!=checkSerial||!checkEnabled)continue;
+     if(ok){checkedTable=table;checkedPath=path;checkedSize=size;checkedTime=time;}
+     else{checkedTable.reset();checkedPath.clear();}
+     result->valid=ok;result->message=why=="silent"?"Silent table (check stereo phase)":why.empty()?"File missing or unreadable":why;
+     delete checkReady.exchange(result.release());
+    }
+   }
    unsigned requestedNow=requested.load();if(requestedNow==done){std::this_thread::sleep_for(std::chrono::milliseconds(8));continue;}
    Snapshot job;{std::lock_guard<std::mutex>guard(jobs);job=snapshot;}done=job.revision;
    auto pub=std::make_unique<Publication>();pub->bank=job.bank;pub->revision=job.revision;pub->draft=job.draft;
    pub->source=job.source;pub->external=job.external;
    std::string path=job.external.empty()?directory+"/Wavetables/"+bank_names[job.bank]:job.external;
-   if(cachePath!=path){cancel=false;auto t=std::make_shared<pf::Wavetable>();std::string why;int frame=0;
-    bool ok=job.external.empty()||inspectImport(path,frame,why);
-    if(ok)ok=pf::loadWavetable(path,*t,&why,&cancel,frame);
+   if(cachePath!=path||(!job.external.empty()&&cacheSource!=job.source)){cancel=false;auto t=std::make_shared<pf::Wavetable>();std::string why;int frame=0;
+    std::uintmax_t size=0;std::filesystem::file_time_type time{};
+    bool reused=!job.external.empty()&&checkedTable&&checkedPath==path&&fingerprint(path,size,time)&&size==checkedSize&&time==checkedTime;
+    bool ok=reused||job.external.empty()||inspectImport(path,frame,why);
+    if(reused)t=checkedTable;else if(ok)ok=pf::loadWavetable(path,*t,&why,&cancel,frame);
     if(stop)break;if(sourceSerial.load()!=job.source)continue;
-    if(ok){cache=t;cacheBank=job.bank;cachePath=path;}else{pub->error=1;pub->message=why=="silent"?"Silent table (check stereo phase)":why.empty()?"Table unavailable":why;Publication*old=ready.exchange(pub.release());delete old;continue;}}
+    if(ok){cache=t;cacheBank=job.bank;cachePath=path;cacheSource=job.source;}else{pub->error=1;pub->message=why=="silent"?"Silent table (check stereo phase)":why.empty()?"Table unavailable":why;Publication*old=ready.exchange(pub.release());delete old;continue;}}
    std::array<double,6> fs{};const char* fk[]={"hp_cutoff","hp_res","lp_cutoff","lp_res","filter_model","drive"};for(int i=0;i<6;i++)fs[i]=job.values[id(fk[i])];
    std::array<double,36> ps{};const char* pk[]={"x","y","path_mode","path_rate","path_depth","orbit_rate","orbit_width","orbit_height","orbit_phase","path_offset","point_count","point_select"};for(int i=0;i<12;i++)ps[i]=job.values[id(pk[i])];char key[40];for(int i=0;i<24;i++){snprintf(key,sizeof key,"point%d_%c",i/2,i%2?'y':'x');ps[12+i]=job.values[id(key)];}
    std::array<double,2> xy={job.values[id("x")],job.values[id("y")]};
@@ -175,8 +204,11 @@ void midi(void*p,const uint8_t*m,int len){auto&e=*static_cast<Instance*>(p);if(l
  else if(op==0xb0&&len>=3){if(m[1]==1)e.synth.patch.modwheel=m[2]/127.;else if(m[1]==64)e.synth.sustain(m[2]>=64);else if(m[1]==120||m[1]==123)e.synth.panic();}}
 void set(void*p,const char*k,const char*v){try{static_cast<Instance*>(p)->set(k,v);}catch(...){static_cast<Instance*>(p)->stateValid=false;}}
 int get(void*p,const char*k,char*b,int n){auto&e=*static_cast<Instance*>(p);if(n<=0)return 0;
+ if(!strcmp(k,"table_frames"))return snprintf(b,n,"%d",e.active&&e.active->table?e.active->table->frames:0);
+ if(!strcmp(k,"table_name")||!strcmp(k,"table_name_display")){
+  const auto*a=e.active;std::string name=a&&a->table?(a->external.empty()?bank_names[a->bank]:std::filesystem::path(a->external).filename().string()):bank_names[e.bank];return snprintf(b,n,"%s",name.c_str());}
  if(!strcmp(k,"import_path"))return snprintf(b,n,"%s",e.externalPath.c_str());
- if(!strcmp(k,"import_status")||!strcmp(k,"import_status_display"))return snprintf(b,n,"%s",e.importMessage.empty()?"256 waveforms · mono/stereo · 16/32-bit":e.importMessage.c_str());
+ if(!strcmp(k,"import_status")||!strcmp(k,"import_status_display"))return snprintf(b,n,"%s",e.importMessage.empty()?"Choose a WAV to validate":e.importMessage.c_str());
  if(!strncmp(k,"browse_item",11)||!strncmp(k,"browse_path",11)||!strncmp(k,"browse_page",11)){std::string key(k);if(key.size()>8&&key.substr(key.size()-8)=="_display")key.resize(key.size()-8);auto text=e.browser.read(key);return snprintf(b,n,"%s",text.c_str());}
  if(!strcmp(k,"state_valid"))return snprintf(b,n,"%d",e.stateValid);if(!strcmp(k,"state")){try{auto s=e.state();if((int)s.size()+1>n)return 0;memcpy(b,s.c_str(),s.size()+1);return (int)s.size();}catch(...){return 0;}}
  size_t len=strlen(k);bool display=len>8&&!strcmp(k+len-8,"_display"),name=len>5&&!strcmp(k+len-5,"_name");int i=id(std::string_view(k,len-(display?8:name?5:0)));if(i<0)return 0;
@@ -195,4 +227,4 @@ void song(void*p,double ppq,double bpm,int playing,int){auto&e=*static_cast<Inst
 const mpc_engine_t api={create,destroy,midi,set,get,render,nullptr,song};
 }
 extern "C" const mpc_engine_t* mpc_engine(){return &api;}
-extern "C" int mpc_engine_changed(void*p,char*k,int n){auto&e=*static_cast<Instance*>(p);if(e.changed[PlotMode]){e.changed.reset(PlotMode);snprintf(k,n,"ui_plot_mode");return 1;}if(e.changed.none())return 0;for(int i=0;i<pmmeta::Count;i++){int a=e.notifyCursor++%pmmeta::Count;if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}}return 0;}
+extern "C" int mpc_engine_changed(void*p,char*k,int n){auto&e=*static_cast<Instance*>(p);if(e.changed[PlotMode]){e.changed.reset(PlotMode);snprintf(k,n,"ui_plot_mode");return 1;}for(int a:importIndices())if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}if(e.changed.none())return 0;for(int i=0;i<pmmeta::Count;i++){int a=e.notifyCursor++%pmmeta::Count;if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}}return 0;}

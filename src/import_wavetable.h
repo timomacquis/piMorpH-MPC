@@ -23,9 +23,19 @@ inline bool inspectImport(const std::string& path,int& frame,std::string& error)
  }
  if(!fmt||!data||(channels!=1&&channels!=2)||rate==0||!((tag==1&&(bits==16||bits==32))||(tag==3&&bits==32))||align!=channels*bits/8)return fail("Use mono/stereo PCM16, PCM32 or float32 WAV");
  if(samples%align)return fail("Incomplete WAV sample");samples/=align;
- frame=samples==512*256?512:samples==1024*256?1024:samples==2048*256?2048:0;
- if(!frame)return fail("Use 256 waveforms of 512, 1024 or 2048 samples");
- if(marker&&marker!=frame)return fail("Cycle metadata conflicts with WAV length");
+ // Honor valid cycle metadata first: 64 x 2048 is a valid table, not
+ // an erroneous 256 x 512 export. Never trim or reinterpret complete cycles.
+ if(marker){
+  if(marker!=512&&marker!=1024&&marker!=2048)return fail("Unsupported cycle metadata (512 / 1024 / 2048)");
+  if(samples%marker||samples/marker<1||samples/marker>256)return fail("Cycle metadata conflicts with WAV length");
+  frame=marker;
+ }else{
+  // Existing metadata-free export convention: 256 waveforms.
+  frame=samples==512*256?512:samples==1024*256?1024:samples==2048*256?2048:0;
+  if(!frame){int matches=0;for(int n:{512,1024,2048})if(samples%n==0&&samples/n>=1&&samples/n<=256){frame=n;matches++;}
+   if(matches!=1)return fail("Cycle size missing or ambiguous (512 / 1024 / 2048)");}
+ }
+
  return true;
 }
 }

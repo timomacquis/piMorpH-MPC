@@ -16,12 +16,16 @@ def wait(fn,inst=p):
   if fn():return
   time.sleep(.002)
  raise AssertionError('timeout: '+get('import_status',inst))
-def make(path,frame,channels=1,rate=44100,count=256,kind='pcm16'):
+def make(path,frame,channels=1,rate=44100,count=256,kind='pcm16',marker=None):
  if kind=='float32':cycle=array.array('f',(.37*math.sin(2*math.pi*i/frame) for i in range(frame)))
  else:cycle=array.array('h' if kind=='pcm16' else 'i',(int((12000 if kind=='pcm16' else 800000000)*math.sin(2*math.pi*i/frame)) for i in range(frame)))
  if channels==2:cycle=array.array(cycle.typecode,(v for value in cycle for v in (value,value)))
  raw=cycle.tobytes()*count;bits=16 if kind=='pcm16' else 32;align=channels*bits//8
- path.write_bytes(struct.pack('<4sI4s4sIHHIIHH4sI',b'RIFF',36+len(raw),b'WAVE',b'fmt ',16,3 if kind=='float32' else 1,channels,rate,rate*align,align,bits,b'data',len(raw))+raw)
+ fmt=struct.pack('<4sIHHIIHH',b'fmt ',16,3 if kind=='float32' else 1,channels,rate,rate*align,align,bits)
+ extra=b''
+ if marker is not None:
+  text=f'<!>{marker} 00000000 wavetable (vital.audio)__'.encode();extra=b'clm '+struct.pack('<I',len(text))+text+(b'\0' if len(text)%2 else b'')
+ body=fmt+extra+b'data'+struct.pack('<I',len(raw))+raw;path.write_bytes(b'RIFF'+struct.pack('<I',len(body)+4)+b'WAVE'+body)
 
 try:
  wait(lambda:get('load_status_display').endswith('.wav'))
@@ -48,16 +52,21 @@ try:
   cancel=d/'opposed.wav';make(cancel,1024,channels=2)
   raw=bytearray(cancel.read_bytes());values=array.array('h');values.frombytes(raw[44:])
   for i in range(1,len(values),2):values[i]=-values[i]
-  cancel.write_bytes(bytes(raw[:44])+values.tobytes());set('import_path',cancel);wait(lambda:get('import_status')!='Loading wavetable...');assert get('state')==before and 'Silent' in get('import_status')
+  cancel.write_bytes(bytes(raw[:44])+values.tobytes());set('import_path',cancel);wait(lambda:get('import_phase')!='3');assert get('state')==before and 'Silent' in get('import_status')
   for name,ch,rate,count in [('surround.wav',3,44100,256),('short.wav',1,44100,10)]:
-   f=d/name;make(f,1024,ch,rate,count);set('import_path',f);wait(lambda:get('import_status')!='Loading wavetable...');assert get('state')==before,(name,'old table/state lost')
-  set('import_path',d/'missing.wav');wait(lambda:get('import_status')!='Loading wavetable...');assert get('state')==before
+   f=d/name;make(f,1024,ch,rate,count);set('import_path',f);wait(lambda:get('import_phase')!='3');assert get('state')==before,(name,'old table/state lost')
+  set('import_path',d/'missing.wav');wait(lambda:get('import_phase')!='3');assert get('state')==before
   set('browse_path_set',d);wait(lambda:get('browse_path_display')==str(d));assert '[DIR] Folder'==get('browse_item0_display')
   entries=[get(f'browse_item{i}_display') for i in range(6)];assert not any('ignored.txt' in e for e in entries)
   set('browse_item0',1);wait(lambda:get('browse_path_display')==str(d/'Folder'));set('browse_up',1);wait(lambda:get('browse_path_display')==str(d))
   # Clicking a listed WAV uses the same import path and closes the panel on success.
   set('import_open',1);set('browse_path_set',d);wait(lambda:get('browse_path_display')==str(d))
-  pick=d/'Pick';pick.mkdir();f=pick/'chosen.wav';make(f,512);set('browse_path_set',pick);wait(lambda:get('browse_item0_display')=='chosen.wav');set('browse_item0',1);wait(lambda:get('import_path')==str(f));assert get('import_open')=='0'
+  pick=d/'Pick';pick.mkdir();f=pick/'chosen.wav';make(f,2048,count=64,kind='float32',marker=2048);(pick/'bad.wav').write_bytes(b'not a wave')
+  set('browse_path_set',pick);wait(lambda:get('browse_item0_display')=='bad.wav');old=get('import_path');old_state=get('state')
+  set('browse_item0',1);wait(lambda:get('import_phase')=='4');assert get('import_status').startswith('ERROR : ') and get('state')==old_state
+  set('browse_item1',1);wait(lambda:get('import_phase') in ['2','4']);assert get('import_status')=='VALID' and get('import_path')==old and get('import_open')=='1'
+  set('browse_item1',1);assert get('import_phase')=='3' and get('import_status')=='LOADING'
+  wait(lambda:get('import_path')==str(f));assert get('import_open')=='0' and get('table_frames')=='64' and get('table_name_display')=='chosen.wav'
   # Latest request wins; no stale loaded table can overwrite it.
   for frame in [512,1024,2048]:set('import_path',d/f'table {frame} pcm16.WAV')
   wait(lambda:get('import_path')==str(d/'table 2048 pcm16.WAV'))

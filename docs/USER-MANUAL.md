@@ -53,9 +53,9 @@ The bottom button chooses the playing mode:
 
 ### Import your own table
 
-In **SPACE**, press **IMPORT**, then choose a WAV from **DISKS** or **USER**.
+In **SPACE**, press **IMPORT**, then choose a WAV from **DISKS** or **USER**. First tap validates without changing the sound: **VALID in green**. Tap the same file again: **LOADING in green**, then the panel closes. Errors appear in red with **ERROR :** and leave the current table active.
 
-**256 waveforms**, each containing **512, 1024 or 2048 samples**. **PCM16, PCM32 or float32 WAV**, mono or stereo.
+**1–256 waveforms** with consistent cycle metadata, each containing **512, 1024 or 2048 samples**. **PCM16, PCM32 or float32 WAV**, mono or stereo.
 
 Cycle size is detected automatically. Stereo is averaged to mono and the table is normalized in memory. The WAV sample-rate field does not change oscillator pitch.
 
