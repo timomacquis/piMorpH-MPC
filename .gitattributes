@@ -1,0 +1,7 @@
+* text=auto
+*.png -text
+*.wav -text
+*.ttf -text
+third_party/** -whitespace
+licenses/AdventureKid/Original-Notices/** -text -whitespace
+reference/fonts/OFL.txt -text -whitespace

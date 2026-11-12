@@ -1,0 +1,16 @@
+{
+  "repo": "open-mpc/mpc-vst-plugins",
+  "commit": "eed2f0fa05ca0325c7cdfb6e9729dca8de3bd604",
+  "files": {
+    "LICENSE": "ce8ee66cb52d9d54312bc5d0c3c041ce3bc8eec9f482370b80ccb29b5a9ea66e",
+    "tools/release.py": "3aa51bfd1e9189f78d1ec629c848e1af97b062f834ef248aec990e3044c48464",
+    "tools/catalog_check.py": "1366f73961c3d8bbb555d2400915d031b5aec158a17f362d6d6fb189c25d15c3",
+    "tools/skin_compat.py": "f8ea34db9d99159f429580cd063ccf736fd7bcabea22a37f71eef3c3d58ec0a4",
+    "tools/skin_roles_2x.json": "8f1538a3fea60b61862a3408ea2ce65091c4e559bb5d43a9a4dc53d4e938a7df",
+    "tools/user_files.py": "8529bda743bebc192fe23bbb75fbc3decb10c46fd1be8f331d0d3b7ca3f830c7",
+    "tools/deps.py": "f6895da10941ab44373a043e75d82a2d44022145a8bc0ebc6a390e1c92693ca8",
+    "tools/release/install.sh": "4686296a333b8d2f618045f6d3566ebd24433a03a92b38615150ab5bb9f02cf4",
+    "tools/release/uninstall.sh": "cc7e9c8265d24aa78c6556f20248e7c6e784797a841102454dbe282a84d51f5f",
+    "tools/release/plugin_list.awk": "a6df58b45fc6baf98d5f3a1c7e126d1c3dee42031883d84164b8b28d815534c2"
+  }
+}

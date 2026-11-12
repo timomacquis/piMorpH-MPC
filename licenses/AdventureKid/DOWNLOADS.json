@@ -1,0 +1,14 @@
+[
+  {
+    "file": "AKWF-Animoog.zip",
+    "source": "https://www.animoog.org/wp-content/uploads/2014/04/AKWF.zip",
+    "bytes": 10589112,
+    "sha256": "1a81de8639918b413f213fada31cb92a1e63d7be8332c6f1c078ffe7acb3751f"
+  },
+  {
+    "file": "AKWF-Animoog-Reduced.zip",
+    "source": "https://www.animoog.org/wp-content/uploads/2014/04/AKWF-Reduced.zip",
+    "bytes": 8940518,
+    "sha256": "86efbbef738329fd796a1fb53827f1e83b9d5b178bd3243be9e68e1b1ac7924d"
+  }
+]

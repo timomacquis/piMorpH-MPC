@@ -1,0 +1,5 @@
+/build/
+/Validation/
+/dist/
+__pycache__/
+*.pyc

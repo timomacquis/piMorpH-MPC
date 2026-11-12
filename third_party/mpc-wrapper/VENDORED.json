@@ -1,0 +1,40 @@
+{
+  "repo": "sd88me/mpc-vst-plugins",
+  "commit": "97a2effca4114dd00f738b018e2f0d1d3ccb2d7f",
+  "source": "Local piClideaN wrapper snapshot; inherited context extensions disabled for piToniC.",
+  "modifications": "Native enum notifications do not request global UpdateDisplay. Sorted parameter lookup, bounded notifications (8), chunk validation and ARM pthread compatibility retained. πToniC also adds logarithmic Hz/time normalization with physical-value state; tested inverse conversions. Conditional private full-state factory VST programs and PTPROG1 program-index chunk envelope; no factory data in baseline builds.; 1.0.1-candidate.2 handles the explicit qlink_names context event with one coalesced/throttled display update, only when selected voice changes SYNTH/SAMPLE type.",
+  "files": [
+    {
+      "file": "INHERITED-PROVENANCE.json",
+      "sha256": "2818ec512a495f386313b57a827c573a88b47acf6612b32b1a12540544edca71"
+    },
+    {
+      "file": "LICENSE",
+      "sha256": "ce8ee66cb52d9d54312bc5d0c3c041ce3bc8eec9f482370b80ccb29b5a9ea66e"
+    },
+    {
+      "file": "tools/gen_vst.py",
+      "sha256": "a6ea25f7191bf80deebfcfcd3e6a4f39a43fa64dbb8390fb22c59d341f837377"
+    },
+    {
+      "file": "tools/params.py",
+      "sha256": "2d5c8b5dd62979c691a50fbccb44fe05b0fb626e24d7f1aa70d6bdb92748b3ef"
+    },
+    {
+      "file": "wrapper/engine.h",
+      "sha256": "86f2ba335657106ceedd8bd78188ac80d194cf44ddbfe6e0f69436927f5e8a5d"
+    },
+    {
+      "file": "wrapper/plugin_dir.h",
+      "sha256": "3c513cfbe2a75ceca5a78ebbd710b9ebf935b0d2387de6fc48685bced80b0154"
+    },
+    {
+      "file": "wrapper/popup.h",
+      "sha256": "e6b0c386779c1e11897a6697fbcba67f39472424aa49bbaff2bdc6886320e9a1"
+    },
+    {
+      "file": "wrapper/vst2_wrap.c",
+      "sha256": "abe97568f38038c9e64a4c02fa6b79145d911169781734d3ee88de4040fbf22f"
+    }
+  ]
+}
