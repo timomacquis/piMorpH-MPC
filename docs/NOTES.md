@@ -7,3 +7,7 @@
 
 ## 2026-11-12 — 0.1.1 bank replacement
 100 Greg original multi-frame patches + INIT. Edited Velvet Field recovered from the Force and placed first. Seven preceding audition patches removed. Names/settings of retained sounds preserved. No new DSP/UI processing. Exact-package hardware test pending.
+
+
+## 2026-11-12 — 0.1.1 label image padding
+Black label rectangles were observed on Force. The 50 source caption images contain their text correctly. Increase only their backing canvas to at least 6400 pixels; retain the original clipping bounds and all visible pixels. This is a compatibility candidate, not yet hardware-confirmed. Engine and factory states are unchanged.

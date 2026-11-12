@@ -62,7 +62,9 @@ def dial(key,title,x,y,w,h,extra=None,slider=False):
  # Static captions are artwork, avoiding repeated host name queries.
  cap=f'caption_{hashlib.sha256(title.encode()).hexdigest()[:12]}_{w}.png'
  if not (A/cap).exists():
-  im=Image.new('RGB',(w-94,25),PANEL);ImageDraw.Draw(im).text(((w-94)/2,12),title,font=font(18),fill=INK,anchor='mm');im.save(A/cap)
+  # Native Image components can render undersized bitmaps as black boxes.
+  # Pad the backing canvas; MPC clips to the original 25px label bounds.
+  im=Image.new('RGB',(w-94,max(25,math.ceil(6400/(w-94)))),PANEL);ImageDraw.Draw(im).text(((w-94)/2,12),title,font=font(18),fill=INK,anchor='mm');im.save(A/cap)
  parts.append(art(cap,10 if slider else 86,8,w-16 if slider else w-94,25))
  if slider:
   for c in parts:

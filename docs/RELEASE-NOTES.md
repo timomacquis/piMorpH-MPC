@@ -1,5 +1,9 @@
 # πMorpH 0.1.1
 
+## Skin compatibility update
+
+The 0.1.1 package was refreshed to pad the backing images of 50 static knob labels. Their visible pixels, text positions, presets and engine binary are unchanged. This addresses undersized-image rendering compatibility; offline image and package checks pass, while confirmation on the Force is pending.
+
 ## New native preset bank
 
 - 100 original multi-frame wavetable sound patches by Greg, plus INIT.
