@@ -2,6 +2,8 @@
 import subprocess,sys,os
 from config import B
 os.chdir(B)
+(B/'Validation').mkdir(exist_ok=True)
+(B/'build').mkdir(exist_ok=True)
 def run(args,out=None):
  result=subprocess.run(args,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
  if out:(B/'Validation'/out).write_text(result.stdout)

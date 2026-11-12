@@ -5,7 +5,7 @@ from config import B,FOLDER,VERSION
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 assert VERSION=='0.1.0'
 for name in ['NATIVE-TEST.txt','HOST-TEST.txt']:assert 'PASS:' in (B/'Validation'/name).read_text()
-assert 'PASS:' in (B/'build/public-bank-test.log').read_text()
+audio=json.loads((B/'Validation/Factory-Sounds/AUDIO-CHECK.json').read_text());assert len(audio['results'])==295 and all(r['clipped_samples']==0 and r['peak']>12 for r in audio['results'])
 built=json.loads((B/'build/build-receipt.json').read_text())
 for name,h in built['inputs'].items():assert sha(B/name)==h,'Stale input: '+name
 assert sha(B/'build/pimorph.so')==built['outputs']['pimorph.so']

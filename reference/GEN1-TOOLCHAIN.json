@@ -1,0 +1,14 @@
+{
+  "libstdc++-10-dev-armhf-cross_10.2.1-6cross1_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/g/gcc-10-cross/libstdc++-10-dev-armhf-cross_10.2.1-6cross1_all.deb",
+    "sha256": "371c915ef3306695859ede08bbfced40a970c0386816a1d741211394fb26f191"
+  },
+  "libc6-armhf-cross_2.31-9cross4_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-armhf-cross_2.31-9cross4_all.deb",
+    "sha256": "4895ed1617de67ba831836f2f9ecab7878075267b34472328442ebd45268ecb2"
+  },
+  "libc6-dev-armhf-cross_2.31-9cross4_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-dev-armhf-cross_2.31-9cross4_all.deb",
+    "sha256": "d4131c12320cea918d4c16860cfb5d227182189bfed0faf8ff1bf07f3dda17fe"
+  }
+}

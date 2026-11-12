@@ -355,7 +355,7 @@ for definition in defs:
   if leaf['handle remapping']['map'] or leaf['bounds']['additionalInvalidatingHandles']:continue
   c['componentData']=leaf['componentData'].copy();c['bounds']['acceptsHWFocus']='No';flattened+=1
 print('Inlined',flattened,'passive graph leaf references; visual assets and geometry unchanged')
-(B/'Validation/Native-Graphics/Level1-Standard-Skin/layout.json').write_text(json.dumps(modal_manifest,ensure_ascii=False,indent=2)+'\n')
+(B/'build/skin-layout.json').write_text(json.dumps(modal_manifest,ensure_ascii=False,indent=2)+'\n')
 (A/'TUI.json').write_text(json.dumps(J,ensure_ascii=False,separators=(',',':')))
 ql=[]
 for page,keys in enumerate(page_keys):
