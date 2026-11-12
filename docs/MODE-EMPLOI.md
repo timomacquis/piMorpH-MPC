@@ -175,7 +175,7 @@ Les lignes visant la même destination s’additionnent. AMOUNT est une profonde
 
 ## 8. Garder ses découvertes
 
-Le menu **PRESET** contient **100 sons différenciés + INIT**, construits à partir des 100 tables fournies. Velvet Field est le premier preset, avec les réglages sauvegardés par Greg sur la Force. Chaque son possède ses propres réglages.
+Le menu **PRESET** contient **100 sons différenciés + INIT**, construits à partir des 100 tables fournies. Velvet Field est le premier preset, avec les réglages sauvegardés sur la Force. Chaque son possède ses propres réglages.
 
 Utilise la sauvegarde native de la Force pour conserver un preset ou ton projet. La table choisie et les réglages musicaux sont mémorisés ensemble.
 

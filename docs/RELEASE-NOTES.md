@@ -6,10 +6,10 @@ The 0.1.1 package was refreshed to pad all undersized regular images, including 
 
 ## New native preset bank
 
-- 100 original multi-frame wavetable sound patches by Greg, plus INIT.
+- 100 original multi-frame wavetable sound patches, plus INIT.
 - Replaces the Adventure Kid bank assembled from individual single-cycle waveforms with dedicated multi-frame tables for scanning and morphing.
 - Mono WAV, PCM 16-bit, 44.1 kHz; 1024 samples per waveform, 256 waveforms per table.
-- Velvet Field is preset 1, with Greg's edited settings recovered from his Force.
+- Velvet Field is preset 1, with its edited settings recovered from the Force.
 - The seven presets preceding Velvet Field in the private audition bank are omitted. Retained patches keep their names and sound settings.
 - No synthesis or graphical-engine changes; Force Gen1 / ARMv7 only.
 

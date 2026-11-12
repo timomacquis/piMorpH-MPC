@@ -26,7 +26,7 @@ Package: **piMorpH-0.1.1-mpc-armv7.zip**. Use the included standard installer af
 
 [Français](docs/MODE-EMPLOI.md) · [English](docs/USER-MANUAL.md) · [Build](docs/BUILD.md) · [Validation](docs/VALIDATION.md).
 
-This update replaces the previous Adventure Kid bank, assembled from single-cycle waveforms, with 100 original multi-frame wavetable patches by Greg plus INIT. Velvet Field, edited on the Force, is preset 1. Keep the 0.1.0 package for projects using its old table filenames.
+This update replaces the previous Adventure Kid bank, assembled from single-cycle waveforms, with 100 original multi-frame wavetable patches plus INIT. Velvet Field, edited on the Force, is preset 1. Keep the 0.1.0 package for projects using its old table filenames.
 
 ## Status
 
@@ -34,4 +34,4 @@ Offline engine, wrapper, state, wavetable-loading and rendering tests pass. Earl
 
 ## Sources and licensing
 
-GPL-3.0-or-later for the instrument. Original factory wavetables by Greg, included with the author's permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.
+GPL-3.0-or-later for the instrument. Original factory wavetables included with redistribution permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.

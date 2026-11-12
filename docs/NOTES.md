@@ -6,7 +6,7 @@
 
 
 ## 2026-11-12 — 0.1.1 bank replacement
-100 Greg original multi-frame patches + INIT. Edited Velvet Field recovered from the Force and placed first. Seven preceding audition patches removed. Names/settings of retained sounds preserved. No new DSP/UI processing. Exact-package hardware test pending.
+100 original multi-frame patches + INIT. Edited Velvet Field recovered from the Force and placed first. Seven preceding audition patches removed. Names/settings of retained sounds preserved. No new DSP/UI processing. Exact-package hardware test pending.
 
 
 ## 2026-11-12 — 0.1.1 label image padding

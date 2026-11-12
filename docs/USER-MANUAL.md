@@ -175,7 +175,7 @@ Rows targeting the same destination add together. AMOUNT is a modulation depth, 
 
 ## 8. Keep your discoveries
 
-The **PRESET** menu contains **100 shaped sounds + INIT**, built from the 100 supplied tables. Velvet Field is preset 1, using Greg’s settings saved on the Force. Each sound has its own settings.
+The **PRESET** menu contains **100 shaped sounds + INIT**, built from the 100 supplied tables. Velvet Field is preset 1, using the settings saved on the Force. Each sound has its own settings.
 
 Use the Force’s native save functions to keep a preset or your project. The selected table and musical settings are stored together.
 

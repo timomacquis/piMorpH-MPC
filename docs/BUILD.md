@@ -14,7 +14,7 @@ python3 tests/factory_sounds_test.py
 python3 scripts/package_release.py
 ```
 
-The 100 original multi-frame wavetables are included under `Wavetables`. `presets/factory-bank.json` is the authoritative bank order and complete sound-state definition, including Greg’s edited Velvet Field. Generation preserves these states rather than rerandomizing them.
+The 100 original multi-frame wavetables are included under `Wavetables`. `presets/factory-bank.json` is the authoritative bank order and complete sound-state definition, including the edited Velvet Field preset. Generation preserves these states rather than rerandomizing them.
 
 `params.lock` preserves parameter indices. Do not force regeneration or reorder existing controls. Factory INIT is appended after the 100 table-based programs.
 
