@@ -2,7 +2,7 @@
   "name": "πMorpH",
   "vendor": "Timo",
   "uid": "PiMH",
-  "version": 100,
+  "version": 101,
   "so": "pimorph.so",
   "params": "params.json",
   "custom_skin": true,
