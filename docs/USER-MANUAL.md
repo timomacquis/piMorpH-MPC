@@ -6,7 +6,7 @@ Pick a sound. Play a note. Let its timbre travel.
 
 **πMorpH is a polyphonic wavetable synthesizer.** Each voice explores an XY space, follows a path and an orbit, then passes through two filters. Envelopes and LFOs bring it to life.
 
-This guide describes the first **0.1.0, Force Gen1 / ARM32** release with **294 shaped sounds + INIT**.
+This guide describes the **0.1.1, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
 
 ## 1. Your first journey
 
@@ -175,7 +175,7 @@ Rows targeting the same destination add together. AMOUNT is a modulation depth, 
 
 ## 8. Keep your discoveries
 
-The **PRESET** menu contains **294 shaped sounds + INIT**, built from the 294 supplied tables. Table names remain the preset names; each sound has its own settings.
+The **PRESET** menu contains **100 shaped sounds + INIT**, built from the 100 supplied tables. Velvet Field is preset 1, using Greg’s settings saved on the Force. Each sound has its own settings.
 
 Use the Force’s native save functions to keep a preset or your project. The selected table and musical settings are stored together.
 

@@ -1,4 +1,4 @@
-# Building πMorpH 0.1.0
+# Building πMorpH 0.1.1
 
 Target: Force Gen1, ARMv7 hard-float. The x86_64 build is for offline tests.
 
@@ -14,8 +14,8 @@ python3 tests/factory_sounds_test.py
 python3 scripts/package_release.py
 ```
 
-The 294 CC0 wavetables are included under `Wavetables`. Their original archive URLs and hashes, author license and notices are under `licenses/AdventureKid`. No private bank is required to build.
+The 100 original multi-frame wavetables are included under `Wavetables`. `presets/factory-bank.json` is the authoritative bank order and complete sound-state definition, including Greg’s edited Velvet Field. Generation preserves these states rather than rerandomizing them.
 
-`params.lock` preserves parameter indices. Do not force regeneration or reorder existing controls. Factory INIT is appended after the 294 table-based programs.
+`params.lock` preserves parameter indices. Do not force regeneration or reorder existing controls. Factory INIT is appended after the 100 table-based programs.
 
 Packaging uses the pinned Open MPC release tools and validates the portable catalog format. It does not access or install on a device.

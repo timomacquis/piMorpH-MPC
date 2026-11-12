@@ -39,7 +39,7 @@ assert len(P)<=4096, 'Force native skin handles must fit indices 0..4095'
 keys=[p['key'] for p in P];lock=B/'params.lock'
 if lock.exists():assert keys[:len(old:=lock.read_text().splitlines())]==old,'parameter prefix changed'
 lock.write_text('\n'.join(keys)+'\n');(B/'params.json').write_text(json.dumps(P,indent=2)+'\n');(B/'build').mkdir(exist_ok=True)
-config=dict(name='πMorpH',vendor='Timo',uid='PiMH',version=100,so='pimorph.so',params='params.json',custom_skin=True,cc=False,nrpn=False,defines=dict(SAMPLE_ACCURATE=1,HAS_SONG_POS=1,PARAM_TEXT_MAX=128,MPC_CHUNK_BYTES=32768,PICN_NOTIFICATION_BUDGET=2,PICN_GRAPHICS_REPORT_FRAMES=256,PICN_PLOT_MODE_PARAM=keys.index('ui_plot_mode'),MODULE_SUBDIR='"."',PIMORPH_FACTORY_PROGRAMS=1))
+config=dict(name='πMorpH',vendor='Timo',uid='PiMH',version=101,so='pimorph.so',params='params.json',custom_skin=True,cc=False,nrpn=False,defines=dict(SAMPLE_ACCURATE=1,HAS_SONG_POS=1,PARAM_TEXT_MAX=128,MPC_CHUNK_BYTES=32768,PICN_NOTIFICATION_BUDGET=2,PICN_GRAPHICS_REPORT_FRAMES=256,PICN_PLOT_MODE_PARAM=keys.index('ui_plot_mode'),MODULE_SUBDIR='"."',PIMORPH_FACTORY_PROGRAMS=1))
 (B/'vst.json').write_text(json.dumps(config,ensure_ascii=False,indent=2)+'\n');cfg=gen_vst.load(str(B/'vst.json'));gen_vst.gen_params(cfg,P,str(B/'build/params.h'))
 with (B/'build/params.h').open('a') as out:out.write('\nstatic const unsigned char PICN_AUTOMATABLE[NPARAMS]={'+','.join('1' if p['key'] in {f['key'] for f in FIELDS} and p['key'] not in ['point_select','slot_select'] else '0' for p in P)+'};\n')
 # Separate fine graphics from lightweight markers without moving parameters.
@@ -56,17 +56,14 @@ for p in P:
  unit=next((f['unit'] for f in FIELDS if f['key']==p['key']),'');meta.append('{'+','.join([cstr(p['key']),cstr(p['name']),str(p['min']),str(p['max']),str(p['default']),str(len(p.get('options',[]))),cstr(unit)])+'},')
 meta+=['};','constexpr int Count=sizeof(params)/sizeof(params[0]);','constexpr int Canonical='+str(len(FIELDS))+';','}'];(B/'build/metadata.h').write_text('\n'.join(meta)+'\n')
 from factory_sounds import make_sound,init_sound,state
-rows=json.loads((B/'build/prepared-tables.json').read_text());names=set();programs=[];header=['#pragma once',f'#define PIMORPH_FACTORY_COUNT {len(rows)+1}','typedef struct {const char* name;const char* state;} PiMorphFactory;','static const PiMorphFactory PIMORPH_FACTORY[]={']
-for i,r in enumerate(rows):
- name=r['name'][:23]
- if name in names:name=name[:18]+f' {i+1:03}'
- names.add(name);filename=r['name']+'.wav';family,values=make_sound(filename,i);sound_state=state(filename,values);header.append('{'+cstr(name)+','+cstr(sound_state)+'},');programs.append(dict(name=name,filename=filename,full_name=r['name'],family=family,parameters=values,state=sound_state))
-filename=programs[0]['filename'];values=init_sound();sound_state=state(filename,values)
-header.append('{'+cstr('INIT')+','+cstr(sound_state)+'},');programs.append(dict(name='INIT',filename=filename,full_name='INIT',family='Init',parameters=values,state=sound_state))
+programs=json.loads((B/'presets/factory-bank.json').read_text());assert len(programs)==101 and programs[0]['name']=='Velvet Field' and programs[-1]['name']=='INIT'
+from factory_sounds import validate
+for p in programs:validate(p['parameters']);assert p['state']==state(p['filename'],p['parameters'])
+header=['#pragma once',f'#define PIMORPH_FACTORY_COUNT {len(programs)}','typedef struct {const char* name;const char* state;} PiMorphFactory;','static const PiMorphFactory PIMORPH_FACTORY[]={']
+for p in programs:header.append('{'+cstr(p['name'])+','+cstr(p['state'])+'},')
 header.append('};');(B/'build/pimorph_factory_programs.h').write_text('\n'.join(header)+'\n')
 (B/'presets/programs.json').write_text(json.dumps(programs,ensure_ascii=False,indent=2)+'\n')
-# Bank indices stay exactly as before: INIT reuses bank 0 and adds no table.
-(B/'build/bank_names.h').write_text('#pragma once\nstatic const char* bank_names[]={'+','.join(cstr(r['name']+'.wav') for r in rows)+'};\n')
+(B/'build/bank_names.h').write_text('#pragma once\nstatic const char* bank_names[]={'+','.join(cstr(p['filename']) for p in programs[:-1])+'};\n')
 print('Generated',len(P),'native parameters and',len(programs),'programs')
 
 with (B/'build/params.h').open('a') as out:

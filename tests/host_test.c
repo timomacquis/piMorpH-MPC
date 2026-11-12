@@ -15,14 +15,14 @@ if(i==PICN_PLOT_MODE_PARAM){mode_events++;last_mode=f;if(f<.5f){wrap_t*w=a->obje
 static int param(const char*key){for(int i=0;i<NPARAMS;i++)if(!strcmp(PARAMS[i].key,key))return i;assert(0);return -1;}
 static void block(AEffect*a,float**out){test_frames+=128;a->processReplacing(a,0,out,128);}
 int main(){AEffect*a=VSTPluginMain(host),*b=VSTPluginMain(host);assert(a&&b&&a->numPrograms==PIMORPH_FACTORY_COUNT&&a->numParams==NPARAMS);a->dispatcher(a,effOpen,0,0,0,0);b->dispatcher(b,effOpen,0,0,0,0);float l[128],r[128];float*out[]={l,r};
- for(int i=0;i<100;i++){block(a,out);usleep(2000);}char status[128];eng_get(a->object,"load_status_display",status,sizeof status);assert(strstr(status,".wav"));
+ for(int i=0;i<3000;i++){block(a,out);usleep(2000);}char status[128];eng_get(a->object,"load_status_display",status,sizeof status);assert(strstr(status,".wav"));
  char names[PIMORPH_FACTORY_COUNT][32];for(int j=0;j<PIMORPH_FACTORY_COUNT;j++){a->dispatcher(a,effGetProgramNameIndexed,j,0,names[j],0);assert(names[j][0]);for(int k=0;k<j;k++)assert(strcmp(names[j],names[k]));}
  for(int i=0;i<NPARAMS;i++)if(PIMORPH_CURVE[i])for(int j=0;j<=16;j++){char temp[64];float n=j/16.f;norm_to_str(&PARAMS[i],n,temp,sizeof temp);assert(fabsf(str_to_norm(&PARAMS[i],temp)-n)<.0001f);}
  a->setParameter(a,param("filter_model"),0);a->setParameter(a,param("amp_attack"),0);
  VstMidiEvent m={.type=1,.byteSize=sizeof m,.deltaFrames=48,.midiData={0x90,60,127,0}};VstEvents ev={.numEvents=1,.events={(VstEvent*)&m}};a->dispatcher(a,effProcessEvents,0,0,&ev,0);block(a,out);double energy=0;for(int i=0;i<128;i++){assert(isfinite(l[i])&&isfinite(r[i]));if(i<48)assert(l[i]==0&&r[i]==0);else energy+=fabs(l[i])+fabs(r[i]);}assert(energy>0);
  a->setParameter(a,param("x"),.27f);void*chunk=0;intptr_t size=a->dispatcher(a,effGetChunk,0,0,&chunk,0);assert(size>0&&size<32768);void*copy=malloc(size);memcpy(copy,chunk,size);b->dispatcher(b,effSetChunk,0,size,copy,0);free(copy);assert(fabs(b->getParameter(b,param("x"))-.27)<.0001);
  // Exact factory programme identity survives edited project chunks.
- a->dispatcher(a,effSetProgram,0,177,0,0);assert(a->dispatcher(a,effGetProgram,0,0,0,0)==177);a->setParameter(a,param("x"),.42f);size=a->dispatcher(a,effGetChunk,0,0,&chunk,0);copy=malloc(size);memcpy(copy,chunk,size);b->dispatcher(b,effSetChunk,0,size,copy,0);free(copy);assert(b->dispatcher(b,effGetProgram,0,0,0,0)==177);assert(fabs(b->getParameter(b,param("x"))-.42)<.0001);
+ a->dispatcher(a,effSetProgram,0,99,0,0);assert(a->dispatcher(a,effGetProgram,0,0,0,0)==99);a->setParameter(a,param("x"),.42f);size=a->dispatcher(a,effGetChunk,0,0,&chunk,0);copy=malloc(size);memcpy(copy,chunk,size);b->dispatcher(b,effSetChunk,0,size,copy,0);free(copy);assert(b->dispatcher(b,effGetProgram,0,0,0,0)==99);assert(fabs(b->getParameter(b,param("x"))-.42)<.0001);
  for(int i=0;i<120;i++){block(a,out);usleep(1000);}updates=0;
  for(int k=0;k<32;k++){a->setParameter(a,param("x"),k/31.f);a->setParameter(a,param("filter_model"),(k%3)/2.f);block(a,out);}assert(updates==0);
  // Sustained filter drag after startup/preset queues have drained.
@@ -46,4 +46,4 @@ int main(){AEffect*a=VSTPluginMain(host),*b=VSTPluginMain(host);assert(a&&b&&a->
  assert(last_mode==0&&mode_events>=2&&chart_events>0);
  printf("SPACE reveal stress: hidden during chart callbacks; reveal after all chart values delivered; transitions=%d\n",mode_events);
  printf("SPACE hold stress: during-drag callbacks=%d mode-events=%d update-display=%d; precise recovery budget<=2\n",total_callbacks,mode_events,updates);
- a->dispatcher(a,effClose,0,0,0,0);b->dispatcher(b,effClose,0,0,0,0);puts("PASS: actual wrapper; 295 unique native programmes; tapered value mapping; sample-accurate MIDI; edited chunk roundtrip/programme identity; no full UI rebuild during parameter edits; two instances");}
+ a->dispatcher(a,effClose,0,0,0,0);b->dispatcher(b,effClose,0,0,0,0);puts("PASS: actual wrapper; 101 unique native programmes; tapered value mapping; sample-accurate MIDI; edited chunk roundtrip/programme identity; no full UI rebuild during parameter edits; two instances");}

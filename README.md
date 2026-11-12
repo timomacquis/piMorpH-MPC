@@ -15,18 +15,18 @@ Each voice moves through a wavetable space using a path and an elliptical orbit.
 - Tempo-synced path/orbit timing and dual LFOs with eleven shapes.
 - Native touch controls, contextual Q-Links and compact selection panels.
 - Cached graphical previews, with background updates held during editing.
-- **294 Adventure Kid wavetable sounds + INIT**, in the native PRESET menu.
+- **100 original multi-frame wavetable sounds + INIT**, in the native PRESET menu.
 - Native preset/project state, including all musical parameters and the selected table.
 
 ## Download
 
-[πMorpH 0.1.0 — Force Gen1 / ARMv7](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.1.0)
+[πMorpH 0.1.1 — Force Gen1 / ARMv7](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.1.1)
 
-Package: **piMorpH-0.1.0-mpc-armv7.zip**. Use the included standard installer after saving your project. No Gen2 package is provided.
+Package: **piMorpH-0.1.1-mpc-armv7.zip**. Use the included standard installer after saving your project. No Gen2 package is provided.
 
 [Français](docs/MODE-EMPLOI.md) · [English](docs/USER-MANUAL.md) · [Build](docs/BUILD.md) · [Validation](docs/VALIDATION.md).
 
-This first public release uses the Adventure Kid bank. Earlier private builds used different table names: keep those private builds and tables for their existing projects. They are not interchangeable with this bank.
+This update replaces the previous Adventure Kid bank, assembled from single-cycle waveforms, with 100 original multi-frame wavetable patches by Greg plus INIT. Velvet Field, edited on the Force, is preset 1. Keep the 0.1.0 package for projects using its old table filenames.
 
 ## Status
 
@@ -34,4 +34,4 @@ Offline engine, wrapper, state, wavetable-loading and rendering tests pass. Earl
 
 ## Sources and licensing
 
-GPL-3.0-or-later for the instrument, CC0-1.0 for Adventure Kid's source waveforms. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.
+GPL-3.0-or-later for the instrument. Original factory wavetables by Greg, included with the author's permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.

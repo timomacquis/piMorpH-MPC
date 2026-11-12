@@ -12,15 +12,8 @@
 
 ## Factory wavetables
 
-All 294 factory tables come from Adventure Kid / Kristoffer Ekstrand's AKWF collection, converted for Animoog and hosted on Animoog.org. The source AKWF collection is dedicated under CC0 1.0. The license text, pinned author-repository URL and archive hashes are under `licenses/AdventureKid`.
+The 0.1.1 bank contains 100 original multi-frame wavetable files created and supplied by Greg, distributed with his explicit permission. Format: mono WAV, PCM 16-bit, 44.1 kHz, 1024 samples per waveform, 256 waveforms per table. Original PCM is preserved; frame-size metadata is added for the loader. The bank includes 100 sound patches plus INIT. Velvet Field incorporates Greg's edited Force preset.
 
-Animoog conversion credit: Chrisco. Hosting and concatenated-table documentation: Satri / Animoog.org. Source pages:
-
-- https://www.adventurekid.se/akrt/waveforms/adventure-kid-waveforms/
-- https://github.com/KristofferKarlAxelEkstrand/AKWF-FREE
-- https://forum.moogmusic.com/t/diy-timbres-for-animoog/11924
-- https://www.animoog.org/database/timbres/
-
-Prepared WAV files retain the concatenated PCM data and add a frame-size marker specifying 1024 samples. There are 292 tables with 16 frames, one with 8 and one with 12. The factory bank includes one parameter recipe per table plus INIT. Original source notices are preserved. No Animoog factory/expansion-bank extractions or private ROMs are included. These credits do not imply endorsement by the named authors or companies.
+The Adventure Kid bank belongs to release 0.1.0 and is not included in the 0.1.1 factory bank. Its historical license and provenance notices are retained for traceability; they do not assign CC0 to Greg's new wavetables.
 
 GCC 10 runtime libraries are linked statically under the GCC Runtime Library Exception. The runtime binary does not require a separate device libstdc++ installation.

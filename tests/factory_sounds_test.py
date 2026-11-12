@@ -7,10 +7,10 @@ from factory_sounds import make_sound,init_sound
 bank_variant=False
 bank=B/'Banks/AdventureKid-Animoog'
 program_file=bank/'programs.json' if bank_variant else B/'presets/programs.json'
-expected=295
+expected=101
 rows=json.loads(program_file.read_text());assert len(rows)==expected and rows[-1]['name']=='INIT'
 assert len({json.dumps(r['parameters'],sort_keys=True) for r in rows})==expected
-for i,r in enumerate(rows[:-1]):assert r['parameters']==make_sound(r['filename'],i)[1]
+assert rows==json.loads((B/'presets/factory-bank.json').read_text())
 CREATE=C.CFUNCTYPE(C.c_void_p,C.c_char_p);DESTROY=C.CFUNCTYPE(None,C.c_void_p);MIDI=C.CFUNCTYPE(None,C.c_void_p,C.POINTER(C.c_uint8),C.c_int);SET=C.CFUNCTYPE(None,C.c_void_p,C.c_char_p,C.c_char_p);GET=C.CFUNCTYPE(C.c_int,C.c_void_p,C.c_char_p,C.c_char_p,C.c_int);RENDER=C.CFUNCTYPE(None,C.c_void_p,C.POINTER(C.c_int16),C.c_int)
 class API(C.Structure):_fields_=[('create',CREATE),('destroy',DESTROY),('midi',MIDI),('set',SET),('get',GET),('render',RENDER),('process',C.c_void_p),('song',C.c_void_p)]
 so=C.CDLL(str(bank/'Compiled/pimorph-x86_64.so' if bank_variant else B/'build/pimorph-x86_64.so'));so.mpc_engine.restype=C.POINTER(API);a=so.mpc_engine().contents;p=a.create(str(bank/'Runtime' if bank_variant else B/'build').encode());audio=(C.c_int16*256)();buf=C.create_string_buffer(32768)

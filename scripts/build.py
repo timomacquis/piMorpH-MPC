@@ -23,7 +23,8 @@ for arch in ['x86_64','armv7']:
 files=[]
 for folder in ['src','scripts','tests','third_party','reference']:
  files += [p for p in (B/folder).rglob('*') if p.is_file() and '__pycache__' not in p.parts and p.suffix!='.pyc']
-files += [B/'vst.json',B/'params.json',B/'params.lock']
+files += [B/'vst.json',B/'params.json',B/'params.lock',B/'presets/factory-bank.json',B/'build/pimorph_factory_programs.h',B/'build/bank_names.h']
+files += list((B/'Wavetables').glob('*.wav'))
 receipt={'inputs':{str(f.relative_to(B)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sorted(files)},'outputs':{n:hashlib.sha256((B/'build'/n).read_bytes()).hexdigest() for n in ['pimorph.so','pimorph-x86_64.so']}}
 (B/'build/build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
 print('Built native x86_64 and ARMv7. Hardware not accessed.')

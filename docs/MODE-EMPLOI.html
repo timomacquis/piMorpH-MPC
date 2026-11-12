@@ -1,0 +1,106 @@
+<!doctype html><html><head><meta charset="utf-8"><style>body{max-width:1000px;margin:40px auto;font:18px sans-serif;line-height:1.6}img{max-width:100%}</style></head><body><h1>πMorpH — Mode d’emploi</h1>
+<p><a href="USER-MANUAL.md">English</a></p>
+<p>Choisis un son. Joue une note. Fais voyager son timbre.</p>
+<p><strong>πMorpH est un synthétiseur polyphonique à tables d’ondes.</strong> Chaque voix explore un espace XY, suit un trajet et une orbite, puis traverse deux filtres. Enveloppes et LFO donnent vie à l’ensemble.</p>
+<p>Ce guide décrit la version <strong>0.1.1, Force Gen1 / ARM32</strong>, avec <strong>100 sons paramétrés + INIT</strong>.</p>
+<h2>1. Premier voyage</h2>
+<p>Charge πMorpH sur une piste Plugin.</p>
+<p>Ouvre <strong>PRESET</strong>, en haut à droite, et choisis un son. Les familles proposées vont des basses aux nappes, plucks, leads, textures et claviers. <strong>INIT</strong>, en fin de liste, offre un départ simple.</p>
+<p>Joue les pads ou lance une séquence de notes. Pour entendre évoluer une nappe, maintiens un accord.</p>
+<p>Commence par <strong>X / Y</strong> dans SPACE. Passe ensuite à MOTION pour mettre le timbre en mouvement.</p>
+<p>Les sélecteurs ouvrent un panneau compact. Le choix actif est doré ; <strong>CLOSE</strong> ferme le panneau sans changer le choix. Le sélecteur d’ouverture devient jaune pendant l’ouverture, parfois derrière le panneau.</p>
+<p>Touche un réglage puis tourne la molette, ou utilise les Q-Links affectés à la page.</p>
+<h2>2. SPACE — Choisir son terrain</h2>
+<p>Les captures montrent le skin sur la Force avant le changement de banque ; les noms de presets affichés appartiennent à la banque privée précédente.</p>
+<p><img alt="SPACE sur la Force" src="images/space-force.png" /></p>
+<p><strong>X / Y</strong> placent l’origine dans la table. Entre les positions, les formes d’ondes se mélangent progressivement.</p>
+<p>Le dessin aide à se repérer :</p>
+<ul>
+<li><strong>Violet</strong> : un passage du trajet avec son orbite.</li>
+<li><strong>Gris</strong> : l’onde à la position XY choisie.</li>
+<li><strong>Doré</strong> : l’origine XY.</li>
+<li><strong>Azur</strong> : le départ du parcours représenté, pas un suivi des notes jouées.</li>
+</ul>
+<p>Pendant une manipulation, le repère d’origine bouge sans reconstruire tout le dessin. Après l’arrêt, <strong>Processing…</strong> accompagne brièvement sa préparation, puis le nouveau tracé apparaît complet.</p>
+<p><strong>TRANSPOSE</strong> change le registre, de −24 à +24 demi-tons.</p>
+<p><strong>GLIDE</strong> fait glisser la hauteur entre les notes lorsqu’une voix est réutilisée. Essaie-le en MONO ou LEGATO.</p>
+<p><strong>VOICES</strong> limite la polyphonie à 1–8 voix. <strong>LEVEL</strong> règle le volume ; <strong>PAN</strong>, le panoramique ; <strong>BEND RANGE</strong>, l’étendue du pitch bend.</p>
+<p>Le bouton du bas choisit le jeu :</p>
+<ul>
+<li><strong>POLY</strong> : accords, jusqu’au nombre de voix choisi.</li>
+<li><strong>MONO</strong> : une voix, enveloppes redéclenchées.</li>
+<li><strong>LEGATO</strong> : une voix ; les notes liées gardent les enveloppes et le mouvement en cours.</li>
+</ul>
+<h2>3. MOTION — Dessiner le voyage</h2>
+<p><img alt="MOTION sur la Force" src="images/motion-force.png" /></p>
+<p>Le déplacement commence avec chaque nouvelle voix. Sa durée suit le tempo de la Force.</p>
+<p>Le bouton du bas choisit le parcours :</p>
+<ul>
+<li><strong>FIXED</strong> : pas de trajet ; l’orbite peut encore agir.</li>
+<li><strong>ONE SHOT</strong> : un aller, puis maintien au dernier point.</li>
+<li><strong>LOOP</strong> : retour au départ à chaque tour.</li>
+<li><strong>PING-PONG</strong> : aller et retour en sens inverse.</li>
+</ul>
+<p><strong>PATH RATE</strong> règle la durée d’un aller : de <strong>1/16 à 4 BARS</strong>. En PING-PONG, le retour prend la même durée.</p>
+<p><strong>PATH DEPTH</strong> dose l’écart du trajet autour de XY. À zéro, le trajet ne déplace plus le son. <strong>PATH OFFSET</strong> décale son point de départ dans le parcours.</p>
+<p>Une orbite elliptique s’ajoute au trajet :</p>
+<p><strong>ORBIT RATE</strong> règle sa période.</p>
+<p><strong>ORBIT WIDTH / HEIGHT</strong> règlent sa largeur et sa hauteur. Mets les deux à zéro pour la retirer.</p>
+<p><strong>ORBIT PHASE</strong> décale son départ.</p>
+<p>Pour construire le trajet, ouvre le sélecteur numéroté, choisis un point et ajuste <strong>POINT X / Y</strong>. <strong>ADD POINT / REMOVE POINT</strong> modifient leur nombre ; <strong>PATH POINTS</strong> le règle directement, entre <strong>2 et 12</strong>.</p>
+<p>Les positions restent dans les limites de l’espace XY. Le dessin montre un aperçu du parcours, pas les huit voix en temps réel.</p>
+<h2>4. ENVELOPES — Sculpter la note</h2>
+<p><img alt="ENVELOPES sur la Force" src="images/envelopes-force.png" /></p>
+<p>Deux enveloppes indépendantes par voix.</p>
+<p><strong>AMPLITUDE</strong> façonne le volume.</p>
+<p><strong>FILTER ENVELOPE</strong> anime les coupures, selon les quantités réglées dans FILTER.</p>
+<p>Pour chacune :</p>
+<ul>
+<li><strong>ATTACK</strong> : temps pour atteindre le maximum.</li>
+<li><strong>DECAY</strong> : temps pour rejoindre le niveau de sustain.</li>
+<li><strong>SUSTAIN</strong> : niveau tenu tant que la note reste appuyée.</li>
+<li><strong>RELEASE</strong> : relâchement après la fin de la note.</li>
+</ul>
+<p>Pour un pluck : attaque courte, sustain bas, decay court.</p>
+<p>Pour une nappe : attaque et release plus longs.</p>
+<p>Les courbes servent de repères de réglage ; leur dessin n’est pas une mesure audio de l’enveloppe.</p>
+<h2>5. FILTER — Ouvrir, creuser, faire résonner</h2>
+<p><img alt="FILTER sur la Force" src="images/filter-force.png" /></p>
+<p>Le son traverse <strong>HP → LP</strong> : passe-haut, puis passe-bas.</p>
+<p><strong>HP CUTOFF</strong> retire le grave ; <strong>LP CUTOFF</strong> referme l’aigu. Les deux <strong>RESONANCE</strong> accentuent la zone de coupure.</p>
+<p><strong>DRIVE</strong> pousse l’entrée des filtres.</p>
+<p><strong>HP ENV AMOUNT / LP ENV AMOUNT</strong> appliquent l’enveloppe de filtre. Une valeur négative inverse son action.</p>
+<p><strong>KEYTRACK</strong> fait suivre les coupures à la hauteur des notes.</p>
+<p>Le bouton du bas propose <strong>BYPASS</strong>, <strong>MS STYLE MK1</strong> et <strong>MS STYLE MK2</strong>. En BYPASS, la chaîne de filtres et son drive sont contournés.</p>
+<p>Les courbes séparent <strong>HPF doré</strong>, <strong>LPF bleu</strong> et <strong>réponse combinée violette</strong>. C’est une réponse statique autour du silence : elle ne représente pas les variations dues aux enveloppes, aux modulations ou à la saturation.</p>
+<h2>6. LFO — Ajouter du mouvement</h2>
+<p><img alt="LFO sur la Force" src="images/lfo-force.png" /></p>
+<p>Deux LFO, à connecter dans MOD. <strong>ON</strong> devient doré lorsqu’un LFO est actif.</p>
+<p>Choisis la forme :</p>
+<p><img alt="Sélection de forme LFO" src="images/lfo-wave-panel-force.png" /></p>
+<p><strong>SINE, TRIANGLE, RAMP UP, RAMP DOWN, SQUARE</strong> pour les mouvements réguliers.</p>
+<p><strong>SAMPLE &amp; HOLD, RANDOM SMOOTH, RANDOM WALK, RANDOM LOOP</strong> pour le hasard, par paliers ou plus souple.</p>
+<p><strong>FREE CURVE</strong> pour une courbe personnalisée ; <strong>BOUNCE</strong> pour les rebonds.</p>
+<p><strong>HZ / SYNC</strong> choisit une vitesse libre ou une division synchronisée au tempo.</p>
+<p><strong>RATE</strong> règle la vitesse. <strong>DEPTH</strong> dose le signal du LFO ; <strong>OFFSET</strong> le décale ; <strong>PHASE</strong> déplace son départ.</p>
+<p><strong>FREE</strong> laisse tourner le LFO. En SYNC/FREE, il suit la position du transport.</p>
+<p><strong>NOTE</strong> redémarre sa phase à chaque nouvelle note déclenchée ; les notes liées en LEGATO ne le redéclenchent pas. Les LFO sont partagés par les voix.</p>
+<p>L’aperçu montre <strong>4 cycles</strong> pour les formes régulières, <strong>8 cycles</strong> pour les formes aléatoires. Il décrit le signal, pas une tête de lecture animée.</p>
+<p>Les sous-pages <strong>LFO 1 SHAPE / LFO 2 SHAPE</strong>, accessibles depuis la navigation LFO, donnent les réglages particuliers et les huit points de FREE CURVE : largeur du carré, pas de RANDOM WALK, longueur/évolution de RANDOM LOOP, gravité/rebond de BOUNCE.</p>
+<p><strong>Un LFO allumé sans routage dans MOD ne change pas le son.</strong></p>
+<h2>7. MOD — Relier les idées</h2>
+<p><img alt="MOD sur la Force" src="images/mod-force.png" /></p>
+<p>Huit lignes : <strong>SOURCE → DESTINATION → AMOUNT</strong>.</p>
+<p>Choisis une source, une destination, puis déplace le slider. Une quantité négative inverse l’action. <strong>AMOUNT 0</strong>, <strong>SOURCE OFF</strong> ou <strong>DESTINATION NONE</strong> neutralise la ligne.</p>
+<p>Sources : <strong>LFO 1/2, AMP ENV, FILTER ENV, VELOCITY, NOTE, MOD WHEEL, PRESSURE</strong>.</p>
+<p>Destinations : <strong>POSITION X/Y, PATH RATE, ORBIT RATE/WIDTH/HEIGHT, PITCH, HP/LP CUTOFF, HP/LP RESONANCE, AMPLITUDE, PAN</strong>.</p>
+<p>Essaie :</p>
+<p><strong>LFO 1 → POSITION Y → 6</strong> pour un mouvement discret.</p>
+<p><strong>VELOCITY → LP CUTOFF → 10</strong> pour ouvrir le son avec le jeu.</p>
+<p><strong>MOD WHEEL → POSITION X → 12</strong> pour explorer le timbre à la molette de modulation.</p>
+<p>Les lignes visant la même destination s’additionnent. AMOUNT est une profondeur de modulation, pas une valeur directe en Hz ou en demi-tons.</p>
+<h2>8. Garder ses découvertes</h2>
+<p>Le menu <strong>PRESET</strong> contient <strong>100 sons différenciés + INIT</strong>, construits à partir des 100 tables fournies. Velvet Field est le premier preset, avec les réglages sauvegardés par Greg sur la Force. Chaque son possède ses propres réglages.</p>
+<p>Utilise la sauvegarde native de la Force pour conserver un preset ou ton projet. La table choisie et les réglages musicaux sont mémorisés ensemble.</p>
+<p>Le format et la restitution des états sont testés sur PC. Le cycle complet de sauvegarde/réouverture de cette nouvelle banque par le menu natif reste à confirmer sur la Force.</p>
+<p><strong>Pour repartir simplement : charge INIT, joue une note et explore X / Y.</strong></p></body></html>

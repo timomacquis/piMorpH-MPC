@@ -6,7 +6,7 @@ Choisis un son. Joue une note. Fais voyager son timbre.
 
 **πMorpH est un synthétiseur polyphonique à tables d’ondes.** Chaque voix explore un espace XY, suit un trajet et une orbite, puis traverse deux filtres. Enveloppes et LFO donnent vie à l’ensemble.
 
-Ce guide décrit le première version **0.1.0, Force Gen1 / ARM32**, avec **294 sons paramétrés + INIT**.
+Ce guide décrit la version **0.1.1, Force Gen1 / ARM32**, avec **100 sons paramétrés + INIT**.
 
 ## 1. Premier voyage
 
@@ -175,7 +175,7 @@ Les lignes visant la même destination s’additionnent. AMOUNT est une profonde
 
 ## 8. Garder ses découvertes
 
-Le menu **PRESET** contient **294 sons différenciés + INIT**, construits à partir des 294 tables fournies. Les noms de tables restent les noms des presets ; chaque son possède ses propres réglages.
+Le menu **PRESET** contient **100 sons différenciés + INIT**, construits à partir des 100 tables fournies. Velvet Field est le premier preset, avec les réglages sauvegardés par Greg sur la Force. Chaque son possède ses propres réglages.
 
 Utilise la sauvegarde native de la Force pour conserver un preset ou ton projet. La table choisie et les réglages musicaux sont mémorisés ensemble.
 

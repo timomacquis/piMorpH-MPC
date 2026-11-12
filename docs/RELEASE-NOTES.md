@@ -1,3 +1,24 @@
+# πMorpH 0.1.1
+
+## New native preset bank
+
+- 100 original multi-frame wavetable sound patches by Greg, plus INIT.
+- Replaces the Adventure Kid bank assembled from individual single-cycle waveforms with dedicated multi-frame tables for scanning and morphing.
+- Mono WAV, PCM 16-bit, 44.1 kHz; 1024 samples per waveform, 256 waveforms per table.
+- Velvet Field is preset 1, with Greg's edited settings recovered from his Force.
+- The seven presets preceding Velvet Field in the private audition bank are omitted. Retained patches keep their names and sound settings.
+- No synthesis or graphical-engine changes; Force Gen1 / ARMv7 only.
+
+## Existing projects
+
+This is a replacement factory bank, not a transparent migration. Projects referencing Adventure Kid table filenames require the previous 0.1.0 package and tables. Keep that package before updating.
+
+## Validation
+
+The previous 107-patch audition variant was installed on the author's Force. This exact 100-patch package is checked offline; installation and musical validation of this exact package remain pending. No new Verified status or CPU measurement is claimed.
+
+---
+
 # πMorpH 0.1.0
 
 First public Force Gen1 / ARMv7 release.
