@@ -2,7 +2,7 @@
 
 ## Skin compatibility update
 
-The 0.1.1 package was refreshed to pad the backing images of 50 static knob labels. Their visible pixels, text positions, presets and engine binary are unchanged. This addresses undersized-image rendering compatibility; offline image and package checks pass, while confirmation on the Force is pending.
+The 0.1.1 package was refreshed to pad all undersized regular images, including 50 static knob labels and 24 additional images used by LFO titles, on/off controls, cycle indicators and MOD row numbers. Their visible pixels, text positions, presets and engine binary are unchanged. This addresses undersized-image rendering compatibility; offline image and package checks pass, while confirmation on the Force is pending.
 
 ## New native preset bank
 

@@ -8,7 +8,7 @@ P=json.loads((B/'params.json').read_text());I={p['key']:i for i,p in enumerate(P
 assert max(I.values())<4096, 'Force native skin handle limit exceeded'
 OUT=B/os.environ.get('PMORPH_SKIN_OUTPUT','build/skin')/FOLDER;A=OUT/'Plugin Skins'
 if OUT.exists():shutil.rmtree(OUT)
-A.mkdir(parents=True,exist_ok=True);defs=[]
+A.mkdir(parents=True,exist_ok=True);defs=[];regular_art=set()
 BG='#171c1f';PANEL='#141d24';FIELD='#242c31';INK='#f1f2ed';EDGE='#42515c';AMBER='#c7aa6d'
 def font(n):return ImageFont.truetype(str(B/'reference/fonts/TitilliumWeb-Regular.ttf'),n)
 def bitmap(name,w,h,caption='',fill=FIELD,ink=INK):
@@ -17,6 +17,7 @@ def bounds(x,y,w,h,extra=None):return dict(version=2,acceptsHWFocus='Yes',showWh
 def child(kind,data,x,y,w,h):return {'version':2,'componentData':{'version':1,'name':kind,'type':kind,'data':data},'handle remapping':{'version':1,'map':[]},'bounds':bounds(x,y,w,h)}
 def gate(key,v,n=2):return f'IndexedEnabling/{v}/{n}/Parameter {I[key]}'
 def art(name,x,y,w,h):
+ regular_art.add(name)
  c=child('Image',dict(version=2,imageType='Regular',colour='0',image=name),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
 def label(x,y,w,h,kind='Value',n=26):
  c=child('Label',dict(version=1,textStyle=dict(version=1,font=dict(version=1,name='Titillium Web',style='Regular',height=int(n)),colour='fff1f2ed',justification='horizontallyCentred verticallyCentred',case='Original'),type=kind,handleName='Data'),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
@@ -371,4 +372,16 @@ for j in [1,2]:
  ql.append({'Tab':5,'SubTab':j+1,'Bank Direction':'Column','Q-Links':mapping})
 for name in ['Q-Links.json','Q-Links - 8by1.json','Q-Links - 4by4.json']:(A/name).write_text(json.dumps({'version':4,'info':{'version':1,'type':'CompleteDescription'},'Screen Mode Q-Links':{'version':4,'map':ql},'Program Mode Q-Links':ql[0]['Q-Links']},indent=2))
 (OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.0.0</version></plugincontent>\n')
+# Pad every small regular Image, including LFO headers/toggles/cycle indicators,
+# MOD row numbers and compact panel choices. Keep native clipping geometry intact.
+padded=[]
+for name in sorted(regular_art):
+ path=A/name
+ if not path.is_file() or path.suffix.lower()!='.png':continue
+ im=Image.open(path);w,h=im.size
+ if w*h>=6400:continue
+ canvas=Image.new(im.mode,(w,max(h,math.ceil(6400/w))),(0,0,0,0) if im.mode=='RGBA' else im.getpixel((0,0)))
+ canvas.paste(im,(0,0));assert canvas.crop((0,0,w,h)).tobytes()==im.tobytes();canvas.save(path)
+ padded.append(dict(image=name,old_size=[w,h],new_size=list(canvas.size)))
+(B/'build/regular-image-padding.json').write_text(json.dumps(padded,indent=2)+'\n')
 print('Generated six native pages + two LFO shape subpages;',len(defs),'components;',len(list(A.glob('*.png'))),'cached images')

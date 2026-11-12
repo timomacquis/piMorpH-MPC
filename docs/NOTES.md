@@ -11,3 +11,5 @@
 
 ## 2026-11-12 — 0.1.1 label image padding
 Black label rectangles were observed on Force. The 50 source caption images contain their text correctly. Increase only their backing canvas to at least 6400 pixels; retain the original clipping bounds and all visible pixels. This is a compatibility candidate, not yet hardware-confirmed. Engine and factory states are unchanged.
+
+LFO/MOD follow-up: knob labels returned on the device, while small headers/toggles/indicators remained black. Extend the same clipping-preserving padding to all regular Image components, covering 24 additional assets across pages and subpages. Native Button images and filmstrips retain their existing rendering definitions.
