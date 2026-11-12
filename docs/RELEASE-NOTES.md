@@ -1,3 +1,20 @@
+# πMorpH 0.1.2-candidate.1 — IMPORT
+
+Local Force Gen1 candidate; not installed or published.
+
+- IMPORT button in SPACE with a compact, dimmed-background disk browser and 36 px panel buttons.
+- PCM16, PCM32 and float32 WAV; mono or stereo; 256 waveforms of 512, 1024 or 2048 samples each.
+- Missing cycle metadata is inferred from PCM frame count. Conflicting metadata and incomplete tables are rejected.
+- Stereo is averaged to mono, decoded to the internal representation and peak-normalized in memory. The WAV sample-rate field does not alter oscillator pitch; no audio resampling is applied.
+- Import preserves sound parameters and the source file. Saved presets/projects retain the absolute external path. Keep that file at the same location.
+- Loading and browser scans run on the existing worker. A failed import retains the current table. A successful change retains the existing voice-reset behavior.
+- Existing 4012 parameter indices are unchanged; 15 import/browser parameters are appended (4027 total).
+- The native bank stays at 100 sounds + INIT. Existing regular-image padding and graphics notification limits are retained.
+
+PC validation covers import formats, stereo cancellation, state persistence, failure fallback, browser navigation, latest-request wins, original factory sounds and native engine/wrapper sanitizer checks. Device UI and audio validation remain pending.
+
+---
+
 # πMorpH 0.1.1
 
 ## Skin compatibility update

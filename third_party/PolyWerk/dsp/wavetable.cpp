@@ -925,7 +925,7 @@ std::string stem(const std::string& path) {
 
 } // namespace
 
-bool loadWavetable(const std::string& path, Wavetable& out, std::string* err, const std::atomic<bool>* cancel) {
+bool loadWavetable(const std::string& path, Wavetable& out, std::string* err, const std::atomic<bool>* cancel, int frameSizeHint) {
     std::ifstream f(path, std::ios::binary | std::ios::ate);
     if (!f) return fail(err, "cannot open");
     // A long sample named *.wav must not be read whole: the largest real table (256 frames of
@@ -942,7 +942,7 @@ bool loadWavetable(const std::string& path, Wavetable& out, std::string* err, co
     uint16_t tag = 0, channels = 0, bits = 0, align = 0;
     const uint8_t* data = nullptr;
     size_t dataSize = 0;
-    int frameSize = kTableSize;
+    int frameSize = frameSizeHint ? frameSizeHint : kTableSize;
     for (size_t i = 12; i + 8 <= b.size();) {
         const uint8_t* c = &b[i];
         const size_t sz = rd32(c + 4);
@@ -984,12 +984,18 @@ bool loadWavetable(const std::string& path, Wavetable& out, std::string* err, co
     t.scale.reserve(frames);
     std::vector<cd> x(static_cast<size_t>(frameSize));
     Spectrum sa, sb;
+    // Optional import adaptation; preserve the original factory decoding path.
+    auto sampleAt = [&](size_t sample) {
+        const uint8_t* p = data + sample * align;
+        const float left = readSample(p, tag, bits);
+        return frameSizeHint && channels == 2 ? .5f * left + .5f * readSample(p + bits / 8, tag, bits) : left;
+    };
     for (size_t fr = 0; fr < frames; fr += 2) {
         if (cancel && cancel->load(std::memory_order_relaxed)) return fail(err, "cancelled");
         const bool pair = fr + 1 < frames;
         for (size_t i = 0; i < x.size(); ++i) {
-            const float re = readSample(data + (fr * x.size() + i) * align, tag, bits);
-            const float im = pair ? readSample(data + ((fr + 1) * x.size() + i) * align, tag, bits) : 0.0f;
+            const float re = sampleAt(fr * x.size() + i);
+            const float im = pair ? sampleAt((fr + 1) * x.size() + i) : 0.0f;
             x[i] = cd(re, im);
         }
         fromSamples(x, forward, sa, sb);

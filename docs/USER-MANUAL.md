@@ -6,7 +6,7 @@ Pick a sound. Play a note. Let its timbre travel.
 
 **πMorpH is a polyphonic wavetable synthesizer.** Each voice explores an XY space, follows a path and an orbit, then passes through two filters. Envelopes and LFOs bring it to life.
 
-This guide describes the **0.1.1, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
+This guide describes the **0.1.2 candidate, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
 
 ## 1. Your first journey
 
@@ -50,6 +50,18 @@ The bottom button chooses the playing mode:
 - **POLY**: chords, up to the selected voice limit.
 - **MONO**: one voice, with envelopes retriggered.
 - **LEGATO**: one voice; overlapping notes keep the envelopes and movement running.
+
+### Import your own table
+
+In **SPACE**, press **IMPORT**, then choose a WAV from **DISKS** or **USER**.
+
+**256 waveforms**, each containing **512, 1024 or 2048 samples**. **PCM16, PCM32 or float32 WAV**, mono or stereo.
+
+Cycle size is detected automatically. Stereo is averaged to mono and the table is normalized in memory. The WAV sample-rate field does not change oscillator pitch.
+
+Your sound settings remain. If import fails, the current table stays loaded.
+
+Presets and projects store **the WAV path**: keep it at that location. The original file is never modified.
 
 ## 3. MOTION — Draw the journey
 

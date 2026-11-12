@@ -73,7 +73,7 @@ const Wavetable& classicTable(int wave);
 // polled between frame pairs: once true, the import stops and fails ("cancelled").
 constexpr int kMaxFrames = 256;
 bool loadWavetable(const std::string& path, Wavetable& out, std::string* err = nullptr,
-                   const std::atomic<bool>* cancel = nullptr);
+                   const std::atomic<bool>* cancel = nullptr, int frameSizeHint = 0);
 
 // Highest harmonic h allowed at phase increment `inc` (cycles/sample): we let partials go
 // above Nyquist as long as their alias folds back above ~18 kHz (h * inc <= 0.59 at 44.1 kHz),

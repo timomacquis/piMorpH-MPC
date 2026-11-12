@@ -32618,5 +32618,155 @@
     "max": 1,
     "default": 0,
     "poll": false
+  },
+  {
+    "key": "import_open",
+    "name": "IMPORT_OPEN",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": false
+  },
+  {
+    "key": "browse_up",
+    "name": "BROWSE_UP",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_root",
+    "name": "BROWSE_ROOT",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_user",
+    "name": "BROWSE_USER",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_prev",
+    "name": "BROWSE_PREV",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_next",
+    "name": "BROWSE_NEXT",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item0",
+    "name": "BROWSE_ITEM0",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item1",
+    "name": "BROWSE_ITEM1",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item2",
+    "name": "BROWSE_ITEM2",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item3",
+    "name": "BROWSE_ITEM3",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item4",
+    "name": "BROWSE_ITEM4",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_item5",
+    "name": "BROWSE_ITEM5",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": true
+  },
+  {
+    "key": "browse_path",
+    "name": "BROWSE_PATH",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": false
+  },
+  {
+    "key": "browse_page",
+    "name": "BROWSE_PAGE",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": false
+  },
+  {
+    "key": "import_status",
+    "name": "IMPORT_STATUS",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "momentary": false
   }
 ]

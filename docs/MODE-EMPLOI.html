@@ -2,7 +2,7 @@
 <p><a href="USER-MANUAL.md">English</a></p>
 <p>Choisis un son. Joue une note. Fais voyager son timbre.</p>
 <p><strong>πMorpH est un synthétiseur polyphonique à tables d’ondes.</strong> Chaque voix explore un espace XY, suit un trajet et une orbite, puis traverse deux filtres. Enveloppes et LFO donnent vie à l’ensemble.</p>
-<p>Ce guide décrit la version <strong>0.1.1, Force Gen1 / ARM32</strong>, avec <strong>100 sons paramétrés + INIT</strong>.</p>
+<p>Ce guide décrit la version <strong>0.1.2 candidate, Force Gen1 / ARM32</strong>, avec <strong>100 sons paramétrés + INIT</strong>.</p>
 <h2>1. Premier voyage</h2>
 <p>Charge πMorpH sur une piste Plugin.</p>
 <p>Ouvre <strong>PRESET</strong>, en haut à droite, et choisis un son. Les familles proposées vont des basses aux nappes, plucks, leads, textures et claviers. <strong>INIT</strong>, en fin de liste, offre un départ simple.</p>
@@ -31,6 +31,12 @@
 <li><strong>MONO</strong> : une voix, enveloppes redéclenchées.</li>
 <li><strong>LEGATO</strong> : une voix ; les notes liées gardent les enveloppes et le mouvement en cours.</li>
 </ul>
+<h3>Importer sa propre table</h3>
+<p>Dans <strong>SPACE</strong>, touche <strong>IMPORT</strong>, puis choisis un WAV sur <strong>DISKS</strong> ou <strong>USER</strong>.</p>
+<p><strong>256 formes</strong>, de <strong>512, 1 024 ou 2 048 échantillons</strong> chacune. WAV <strong>PCM 16 bits, PCM 32 bits ou flottant 32 bits</strong>, mono ou stéréo.</p>
+<p>La taille des formes est reconnue automatiquement. La stéréo est moyennée en mono ; le niveau est normalisé en mémoire. La fréquence indiquée dans le WAV ne change pas la hauteur de l’oscillateur.</p>
+<p>Tes réglages restent en place. En cas d’échec, la table actuelle reste chargée.</p>
+<p>Le preset et le projet mémorisent <strong>le chemin du WAV</strong> : conserve-le au même endroit. Le fichier d’origine n’est jamais modifié.</p>
 <h2>3. MOTION — Dessiner le voyage</h2>
 <p><img alt="MOTION sur la Force" src="images/motion-force.png" /></p>
 <p>Le déplacement commence avec chaque nouvelle voix. Sa durée suit le tempo de la Force.</p>

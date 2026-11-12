@@ -35,3 +35,8 @@ Offline engine, wrapper, state, wavetable-loading and rendering tests pass. Earl
 ## Sources and licensing
 
 GPL-3.0-or-later for the instrument. Original factory wavetables included with redistribution permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.
+
+
+## Local development candidate
+
+0.1.2-candidate.1 adds disk wavetable IMPORT. See [IMPORT](docs/IMPORT.md) for supported formats, automatic adaptation and external-file persistence. This candidate has not been installed or published. The download above remains the public 0.1.1 release.

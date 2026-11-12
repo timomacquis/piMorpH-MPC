@@ -2,7 +2,7 @@
 
 πMorpH is distributed under GPL-3.0-or-later. Component licenses and notices remain applicable.
 
-- PolyWerk by Devko: wavetable loader and mipmap construction, MIT, under `third_party/PolyWerk`.
+- PolyWerk by Devko: wavetable loader and mipmap construction, with local optional cycle-size hints and stereo import averaging, MIT, under `third_party/PolyWerk`.
 - MS20XXL by L’Cronx: HP/LP filter DSP, GPL-3.0-or-later, under `third_party/MS20XXL`. No hardware-emulation fidelity claim is made.
 - Overcast by Padbangers: envelope implementation adapted for independent per-voice envelopes, MIT, under `third_party/overcast`.
 - πClideaN by Timo: LFO shapes and bounded random generators, adapted in `src/lfo.h`, MIT; license in `licenses/piClideaN-MIT.txt`.

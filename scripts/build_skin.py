@@ -126,6 +126,27 @@ def popup(parts,key,anchor):
   parts.append(place(local(tag,[native],[action('Q-Link')]),key,x+pad+(op%cols)*(bw+gap),y+gridtop+(op//cols)*(bh+gap),bw,bh,cond))
  parts.append(toggle(flag,'CLOSE',x+(panelw-160)//2,y+footer,160,bh,cond,level1=False))
  modal_manifest.append(dict(key=key,options=len(opts),columns=cols,rows=rows,panel=[x,y,panelw,panelh],button_height=bh,opener=anchor['bounds']['bounds']))
+def import_panel(parts,opener):
+ flag='import_open';cond=[gate(flag,1)];x,y,w,h=180,60,920,496
+ veil='modal_scrim.png'
+ if not (A/veil).exists():Image.new('RGBA',(1280,628),(4,7,13,155)).save(A/veil)
+ blocker=local('import_blocker',[art(veil,0,0,1280,628)],[action('Q-Link')],focus_ring=False)
+ parts.append(place(blocker,flag,0,0,1280,628,cond))
+ raised=copy.deepcopy(opener);raised['bounds']['additionalInvalidatingHandles'].extend(cond);parts.append(raised)
+ fn='import_panel.png';bitmap(fn,w,h,'',PANEL)
+ surface=local('import_surface',[art(fn,0,0,w,h)],[action('Q-Link')],focus_ring=False)
+ parts.append(place(surface,flag,x,y,w,h,cond))
+ elements=[title('IMPORT WAVETABLE',x+24,y+10,w-48,22),readout('browse_path',x+24,y+46,w-48,36,24)]
+ for row in range(6):
+  key=f'browse_item{row}';fn='import_file_row.png'
+  if not (A/fn).exists():bitmap(fn,w-48,36,'',FIELD)
+  component=local('import_row'+str(row),[art(fn,0,0,w-48,36),label(12,0,w-72,36,n=26)],[action('Toggle Switch')])
+  elements.append(place(component,key,x+24,y+94+row*44,w-48,36))
+ elements += [readout('browse_page',x+350,y+366,220,30,24),readout('import_status',x+24,y+444,w-48,30,22)]
+ for key,caption,xx,ww in [('browse_root','DISKS',24,132),('browse_user','USER',168,132),('browse_up','UP',312,100),('browse_prev','PREV',424,100),('browse_next','NEXT',536,100),('import_open','CLOSE',648,248)]:
+  elements.append(toggle(key,caption,x+xx,y+402,ww,36,level1=False))
+ for c in elements:c['bounds']['additionalInvalidatingHandles'].extend(cond)
+ parts.extend(elements)
 # 256-frame shared glyphs: blank is code 225; live curves refresh only after edits.
 for kind,ink in [('wave','#586477'),('path',VIOLET),('segment',VIOLET),('origin',GOLD),('ampgraph',GOLD),('filtergraph',VIOLET),('response',VIOLET),('lfo1graph',GOLD),('lfo2graph',VIOLET)]:
  im=Image.new('RGBA',(8,64*256));d=ImageDraw.Draw(im)
@@ -292,7 +313,7 @@ for page,name in enumerate(PAGES):
  parts=[art('background.png',0,0,1280,628)]
  if page==0:
   parts.append(picker('play_mode','PLAY MODE',768,553,326,48));precise_space(parts,20,92)
-  parts.append(title('ONE PASS · ORIGIN / START · PATH + ORBIT',30,514,590,18));dialgrid(parts,page_keys[page])
+  parts.append(title('ONE PASS · ORIGIN / START · PATH + ORBIT',30,514,440,18));parts.append(toggle('import_open','IMPORT',486,506,126,48));dialgrid(parts,page_keys[page])
  elif page==1:
   parts.append(picker('path_mode','PATH MODE',768,553,326,48));precise_space(parts,20,92,True)
   parts.append(picker('point_select','POINT',20,384,120,48));parts.extend([dial('point_x','POINT X',152,380,224,110),dial('point_y','POINT Y',388,380,224,110)])
@@ -334,6 +355,9 @@ for page,name in enumerate(PAGES):
    idx=int(remap['value'].split()[-1]);key=P[idx]['key']
    if key.endswith('__open'):anchors.setdefault(key[:-6],c)
  for key,anchor in anchors.items():popup(parts,key,anchor)
+ if page==0:
+  opener=next(c for c in parts if any(r['value']==f'Parameter {I["import_open"]}' for r in c['handle remapping']['map']))
+  import_panel(parts,opener)
  # Capacity probe completed; no experimental overlay on this build.
  native=local('page'+str(page),parts);tabs.append(dict(version=3,tabName=name,fnKeyIndex=page,fnKeySubIndex=0,qlinkBoundsData=['0 0 0 0'],componentName=native,initialSize='0 0 1280 628',scale=1.))
 # Native LFO subpages expose extras and eight curve anchors without loading more artwork.
@@ -371,7 +395,7 @@ for j in [1,2]:
  for physical,key in zip([13,9,5,1,14,10,6,2,15,11,7,3,16,12,8,4],keys):mapping[f'Q-Link {physical}']=I[key]
  ql.append({'Tab':5,'SubTab':j+1,'Bank Direction':'Column','Q-Links':mapping})
 for name in ['Q-Links.json','Q-Links - 8by1.json','Q-Links - 4by4.json']:(A/name).write_text(json.dumps({'version':4,'info':{'version':1,'type':'CompleteDescription'},'Screen Mode Q-Links':{'version':4,'map':ql},'Program Mode Q-Links':ql[0]['Q-Links']},indent=2))
-(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.0.0</version></plugincontent>\n')
+(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.2.0</version></plugincontent>\n')
 # Pad every small regular Image, including LFO headers/toggles/cycle indicators,
 # MOD row numbers and compact panel choices. Keep native clipping geometry intact.
 padded=[]
