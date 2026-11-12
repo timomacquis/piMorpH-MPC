@@ -1,6 +1,6 @@
-# πMorpH 0.1.2-candidate.2 — IMPORT
+# πMorpH 0.1.2 — Custom Wavetable
 
-Local Force Gen1 candidate; not installed or published.
+Import your own wavetables from the device drives. Force Gen1 / ARM32 release.
 
 - IMPORT button in SPACE with a compact, dimmed-background disk browser and 36 px panel buttons.
 - PCM16, PCM32 and float32 WAV; mono or stereo; up to 256 waveforms of 512, 1024 or 2048 samples each.
@@ -13,7 +13,7 @@ Local Force Gen1 candidate; not installed or published.
 - Existing 4012 parameter indices are unchanged; 17 import/browser parameters are appended (4029 total).
 - The native bank stays at 100 sounds + INIT. Existing regular-image padding and graphics notification limits are retained.
 
-PC validation covers import formats, stereo cancellation, state persistence, failure fallback, browser navigation, latest-request wins, original factory sounds and native engine/wrapper sanitizer checks. Device UI and audio validation remain pending.
+PC validation covers import formats, stereo cancellation, state persistence, failure fallback, browser navigation, latest-request wins, original factory sounds and native engine/wrapper sanitizer checks. The installed candidate was confirmed on Force Gen1; this release retains its identical engine, skin and factory bank.
 
 ---
 

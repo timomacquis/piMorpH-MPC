@@ -21,3 +21,7 @@ Append-only disk import/browser controls. User-approved PCM32/float32, stereo-to
 
 ## 2026-11-12 — IMPORT candidate.2
 Respect valid cycle metadata before inferring a 256-frame export. RandomFFT2 header corresponds to 64 x 2048 float32 mono and is valid. Two-tap cached validation/load workflow, red ERROR : and green VALID/LOADING. Import button 36px with 16px gap and current WAV name. Append import_phase and table_name without shifting existing controls. No hardware validation claimed.
+
+
+## 2026-11-12 — 0.1.2 Custom Wavetable release
+Candidate.2 confirmed on Force Gen1. Promote without changing runtime bytes. FR/EN manuals and README describe encodings, mono/stereo adaptation, cycle metadata, validation/loading colours and persistent external paths. Public package and sources updated; no restart required for this documentation promotion.

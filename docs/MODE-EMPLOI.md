@@ -6,7 +6,7 @@ Choisis un son. Joue une note. Fais voyager son timbre.
 
 **πMorpH est un synthétiseur polyphonique à tables d’ondes.** Chaque voix explore un espace XY, suit un trajet et une orbite, puis traverse deux filtres. Enveloppes et LFO donnent vie à l’ensemble.
 
-Ce guide décrit la version **0.1.2 candidate, Force Gen1 / ARM32**, avec **100 sons paramétrés + INIT**.
+Ce guide décrit la version **0.1.2, Force Gen1 / ARM32**, avec **100 sons paramétrés + INIT**.
 
 ## 1. Premier voyage
 
@@ -51,17 +51,33 @@ Le bouton du bas choisit le jeu :
 - **MONO** : une voix, enveloppes redéclenchées.
 - **LEGATO** : une voix ; les notes liées gardent les enveloppes et le mouvement en cours.
 
-### Importer sa propre table
+### Custom Wavetable — Ta propre matière
 
-Dans **SPACE**, touche **IMPORT**, puis choisis un WAV sur **DISKS** ou **USER**. Premier appui : validation, **VALID en vert**, sans changer le son. Second appui sur le même fichier : **LOADING en vert**, puis fermeture du panneau. Une erreur apparaît en rouge avec **ERROR :** ; la table actuelle reste chargée.
+Dans **SPACE**, touche **IMPORT**, puis choisis un WAV sur **DISKS** ou **USER**.
 
-**1 à 256 formes** avec métadonnées de cycles cohérentes, de **512, 1 024 ou 2 048 échantillons** chacune. WAV **PCM 16 bits, PCM 32 bits ou flottant 32 bits**, mono ou stéréo.
+**Premier appui** : validation, **VALID en vert**, sans changer le son.
 
-La taille des formes est reconnue automatiquement. La stéréo est moyennée en mono ; le niveau est normalisé en mémoire. La fréquence indiquée dans le WAV ne change pas la hauteur de l’oscillateur.
+**Second appui** sur le même fichier : **LOADING en vert**, puis fermeture du panneau.
+
+**ERROR :** apparaît en rouge en cas d’échec ; la table actuelle reste chargée.
+
+| WAV | Canaux | Échantillons par forme | Formes |
+|---|---|---|---|
+| PCM 16 bits | Mono ou stéréo | 512 / 1 024 / 2 048 | 1 à 256 avec métadonnées cohérentes |
+| PCM 32 bits | Mono ou stéréo | 512 / 1 024 / 2 048 | 1 à 256 avec métadonnées cohérentes |
+| Flottant 32 bits | Mono ou stéréo | 512 / 1 024 / 2 048 | 1 à 256 avec métadonnées cohérentes |
+
+Les métadonnées de cycles sont respectées : une table de 64 × 2 048 reste une table de 64 formes. Sans métadonnées, les exports de 256 formes sont reconnus par leur longueur ; les autres découpages doivent être non ambigus.
+
+La stéréo est moyennée en mono ; le niveau est normalisé en mémoire.
+
+La fréquence indiquée dans le WAV ne change pas la hauteur de l’oscillateur : 44,1 et 48 kHz sont acceptés sans rééchantillonnage audio.
 
 Tes réglages restent en place. En cas d’échec, la table actuelle reste chargée.
 
 Le preset et le projet mémorisent **le chemin du WAV** : conserve-le au même endroit. Le fichier d’origine n’est jamais modifié.
+
+Le nom du WAV apparaît sous le graphique. Le nom du preset en haut reste celui du son de départ tant que tu n’en sauvegardes pas un nouveau.
 
 ## 3. MOTION — Dessiner le voyage
 

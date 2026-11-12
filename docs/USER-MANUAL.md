@@ -6,7 +6,7 @@ Pick a sound. Play a note. Let its timbre travel.
 
 **πMorpH is a polyphonic wavetable synthesizer.** Each voice explores an XY space, follows a path and an orbit, then passes through two filters. Envelopes and LFOs bring it to life.
 
-This guide describes the **0.1.2 candidate, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
+This guide describes the **0.1.2, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
 
 ## 1. Your first journey
 
@@ -51,17 +51,33 @@ The bottom button chooses the playing mode:
 - **MONO**: one voice, with envelopes retriggered.
 - **LEGATO**: one voice; overlapping notes keep the envelopes and movement running.
 
-### Import your own table
+### Custom Wavetable — Your own material
 
-In **SPACE**, press **IMPORT**, then choose a WAV from **DISKS** or **USER**. First tap validates without changing the sound: **VALID in green**. Tap the same file again: **LOADING in green**, then the panel closes. Errors appear in red with **ERROR :** and leave the current table active.
+In **SPACE**, press **IMPORT**, then choose a WAV from **DISKS** or **USER**.
 
-**1–256 waveforms** with consistent cycle metadata, each containing **512, 1024 or 2048 samples**. **PCM16, PCM32 or float32 WAV**, mono or stereo.
+**First tap** validates without changing the sound: **VALID in green**.
 
-Cycle size is detected automatically. Stereo is averaged to mono and the table is normalized in memory. The WAV sample-rate field does not change oscillator pitch.
+**Tap the same file again**: **LOADING in green**, then the panel closes.
+
+**ERROR :** appears in red on failure, leaving the current table active.
+
+| WAV encoding | Channels | Samples per waveform | Waveforms |
+|---|---|---|---|
+| PCM 16-bit | Mono or stereo | 512 / 1024 / 2048 | 1–256 with consistent cycle metadata |
+| PCM 32-bit | Mono or stereo | 512 / 1024 / 2048 | 1–256 with consistent cycle metadata |
+| Float 32-bit | Mono or stereo | 512 / 1024 / 2048 | 1–256 with consistent cycle metadata |
+
+Valid cycle metadata takes precedence: a 64 × 2048 table stays a 64-waveform table. Without metadata, 256-waveform exports are detected by length; other layouts must be unambiguous.
+
+Stereo is averaged to mono and the table is normalized in memory.
+
+The WAV sample-rate field does not change oscillator pitch: 44.1 and 48 kHz files are accepted without audio resampling.
 
 Your sound settings remain. If import fails, the current table stays loaded.
 
 Presets and projects store **the WAV path**: keep it at that location. The original file is never modified.
+
+The WAV filename appears below the graph. The preset name at the top remains the starting sound’s name until you save a new preset.
 
 ## 3. MOTION — Draw the journey
 

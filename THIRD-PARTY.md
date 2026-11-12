@@ -12,7 +12,7 @@
 
 ## Factory wavetables
 
-The 0.1.1 bank contains 100 original multi-frame wavetable files supplied for inclusion in the factory bank with redistribution permission. Format: mono WAV, PCM 16-bit, 44.1 kHz, 1024 samples per waveform, 256 waveforms per table. Original PCM is preserved; frame-size metadata is added for the loader. The bank includes 100 sound patches plus INIT. Velvet Field incorporates the edited Force preset.
+The factory bank contains 100 original multi-frame wavetable files supplied for inclusion in the factory bank with redistribution permission. Format: mono WAV, PCM 16-bit, 44.1 kHz, 1024 samples per waveform, 256 waveforms per table. Original PCM is preserved; frame-size metadata is added for the loader. The bank includes 100 sound patches plus INIT. Velvet Field incorporates the edited Force preset.
 
 The Adventure Kid bank belongs to release 0.1.0 and is not included in the 0.1.1 factory bank. Its historical license and provenance notices are retained for traceability; they do not assign CC0 to the new factory wavetables.
 

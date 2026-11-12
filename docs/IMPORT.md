@@ -1,4 +1,4 @@
-# Wavetable IMPORT — 0.1.2-candidate.2
+# Custom Wavetable — IMPORT · 0.1.2
 
 In SPACE, press the **36 px IMPORT button** below the display, beside the current WAV filename. The old ONE PASS caption is removed.
 
@@ -14,4 +14,4 @@ Save using the native PRESET menu or save the project. The original absolute WAV
 
 The browser shows up to 512 matching files/folders per directory and reports this limit when reached. Dot-files are hidden.
 
-Hardware validation is pending. This candidate is not published or installed automatically.
+The installed candidate was validated on Force Gen1. The public 0.1.2 package retains the same engine and skin. Broader device qualification and Gen2 support are not claimed.
