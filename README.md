@@ -55,3 +55,8 @@ Force Gen1 / ARM32. The installed 0.1.2 candidate was validated on the device; t
 ## Sources and licensing
 
 GPL-3.0-or-later for the instrument. Original factory wavetables included with redistribution permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.
+
+
+## Gen2 ARM64
+
+[Download ARM64](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.1.2/piMorpH-0.1.2-mpc-aarch64.zip) · [Gen2 guide and limitations](docs/INSTALLATION-GEN2.md). **Not tested on Gen2 hardware.** PC validation passes; Force Gen1 remains unchanged.

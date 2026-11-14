@@ -1,0 +1,18 @@
+{
+  "libstdc++-10-dev-arm64-cross_10.2.1-6cross1_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/g/gcc-10-cross/libstdc++-10-dev-arm64-cross_10.2.1-6cross1_all.deb",
+    "sha256": "ce6e193cfa963ebd894c48ca4bfd21dd7a95a5e74293fea68789abdbf3904b23"
+  },
+  "libc6-arm64-cross_2.31-9cross4_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-arm64-cross_2.31-9cross4_all.deb",
+    "sha256": "ccd237814281910e72422a6e86a6ef7570105fc69119ff8fc82f6a4827a8a015"
+  },
+  "libc6-dev-arm64-cross_2.31-9cross4_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/c/cross-toolchain-base/libc6-dev-arm64-cross_2.31-9cross4_all.deb",
+    "sha256": "4b88456f6913474587be547a865c6b42756b2031ca11ddf6285ea6ff4275a48d"
+  },
+  "libgcc-10-dev-arm64-cross_10.2.1-6cross1_all.deb": {
+    "url": "https://deb.debian.org/debian/pool/main/g/gcc-10-cross/libgcc-10-dev-arm64-cross_10.2.1-6cross1_all.deb",
+    "sha256": "eca208337cfdecc8d625cddb6dbc0bffa00b48cfec2d1cc347bfbac3abcea4f5"
+  }
+}
