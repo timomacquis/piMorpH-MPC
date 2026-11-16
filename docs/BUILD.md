@@ -1,4 +1,4 @@
-# Building πMorpH 0.1.2
+# Building πMorpH 0.1.3
 
 Target: Force Gen1, ARMv7 hard-float. The x86_64 build is for offline tests.
 
@@ -22,6 +22,3 @@ The 100 original multi-frame wavetables are included under `Wavetables`. `preset
 Packaging uses the pinned Open MPC release tools and validates the portable catalog format. It does not access or install on a device.
 
 Custom Wavetable uses the existing background worker. Import/browser parameters are append-only (4029 total); `import_phase` controls the native status colours. `src/import_wavetable.h` validates cycle layout and the optional loader hint enables stereo averaging without changing factory-table decoding. Run `tests/import_format_test.cpp` with ASan/UBSan for malformed-header/stereo-cancellation cases; `tests/import_wrapper_test.c` covers real native VST chunk persistence.
-
-
-[Gen2 ARM64 compilation and validation scope](INSTALLATION-GEN2.md).

@@ -32,12 +32,11 @@ Screenshots show the skin on Force before the bank change; displayed preset name
 
 Read the drawing as a map:
 
-- **Violet**: one pass through the path, including its orbit.
 - **Grey**: the waveform at the selected XY position.
-- **Gold**: the XY origin.
-- **Azure**: the start of the displayed journey, not a live note indicator.
+- **Gold cross**: the XY origin.
+- **Coloured numbered dots**: the path points, around the origin according to PATH DEPTH. Each point keeps its colour on SPACE and MOTION (1 azure, 2 violet, 3 pink, 4 orange, 5 green, 6 turquoise, 7 anise, 8 blue, 9 red, 10 lilac, 11 sand, 12 mint).
 
-While you adjust a control, the origin marker moves without rebuilding the entire drawing. After you stop, **Processing…** briefly accompanies its preparation, then the complete new drawing appears.
+The cross and the dots follow your controls live. The waveform stays visible and is redrawn shortly after you stop.
 
 **TRANSPOSE** shifts the register by −24 to +24 semitones.
 
@@ -106,7 +105,7 @@ An elliptical orbit is added to the path:
 
 To build a path, open the numbered selector, choose a point and adjust **POINT X / Y**. **ADD POINT / REMOVE POINT** change the number of points; **PATH POINTS** sets it directly, from **2 to 12**.
 
-Positions stay within the XY space. The drawing previews the journey; it does not track all eight voices in real time.
+Positions stay within the XY space. The view shows the coloured path points and a ring on the selected point; the orbit is not drawn, and the view does not track the eight voices in real time.
 
 ## 4. ENVELOPES — Shape the note
 
@@ -147,7 +146,7 @@ The sound passes through **HP → LP**: high-pass, then low-pass.
 
 The bottom button offers **BYPASS**, **MS STYLE MK1** and **MS STYLE MK2**. BYPASS skips the filter chain and its drive.
 
-The curves show **gold HPF**, **blue LPF** and **violet combined response**. This is a static response around silence: it does not show changes caused by envelopes, modulation or saturation.
+The violet curve shows the combined high-pass → low-pass response and follows the controls as you turn them. This is a static response around silence: it does not show changes caused by envelopes, modulation or saturation.
 
 ## 6. LFO — Add movement
 

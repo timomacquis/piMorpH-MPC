@@ -32785,5 +32785,293 @@
     "default": 0,
     "dynamic_display": true,
     "poll": false
+  },
+  {
+    "key": "pdot0_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot0_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot0_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot1_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot1_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot1_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot2_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot2_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot2_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot3_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot3_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot3_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot4_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot4_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot4_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot5_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot5_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot5_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot6_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot6_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot6_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot7_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot7_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot7_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot8_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot8_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot8_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot9_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot9_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot9_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot10_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot10_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot10_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot11_x",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot11_y",
+    "name": "Point marker",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "pdot11_on",
+    "name": "Point marker",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
   }
 ]

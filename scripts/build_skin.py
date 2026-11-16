@@ -19,8 +19,8 @@ def gate(key,v,n=2):return f'IndexedEnabling/{v}/{n}/Parameter {I[key]}'
 def art(name,x,y,w,h):
  regular_art.add(name)
  c=child('Image',dict(version=2,imageType='Regular',colour='0',image=name),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
-def label(x,y,w,h,kind='Value',n=26,ink='fff1f2ed'):
- c=child('Label',dict(version=1,textStyle=dict(version=1,font=dict(version=1,name='Titillium Web',style='Regular',height=int(n)),colour=ink,justification='horizontallyCentred verticallyCentred',case='Original'),type=kind,handleName='Data'),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
+def label(x,y,w,h,kind='Value',n=26,ink='fff1f2ed',just='horizontallyCentred verticallyCentred'):
+ c=child('Label',dict(version=1,textStyle=dict(version=1,font=dict(version=1,name='Titillium Web',style='Regular',height=int(n)),colour=ink,justification=just,case='Original'),type=kind,handleName='Data'),x,y,w,h);c['bounds']['acceptsHWFocus']='No';return c
 def action(h,event='Mouse Down'):return {'version':2,'onAction':event,'handler':h,'handleName':'Data','additionalData':'','handle remapping':{'version':1,'map':[]}}
 def local(name,parts,actions=None,focus_ring=True):
  if actions and focus_ring:
@@ -85,7 +85,7 @@ Image.new('RGB',(1280,628),BG).save(A/'background.png')
 VIOLET='#b195d7';GOLD='#c4ab70';AZURE='#83bed0';BLACK='#05080d'
 def title(text,x,y,w=540,n=24):
  fn='title_'+hashlib.sha256((text+str(w)+str(n)).encode()).hexdigest()[:14]+'.png';im=Image.new('RGB',(w,36),BG);ImageDraw.Draw(im).text((0,18),text,font=font(n),fill=INK,anchor='lm');im.save(A/fn);return art(fn,x,y,w,36)
-def readout(key,x,y,w,h,n=22,ink='fff1f2ed'):return place(local('read'+str(len(defs)),[label(0,0,w,h,n=n,ink=ink)]),key,x,y,w,h)
+def readout(key,x,y,w,h,n=22,ink='fff1f2ed',just='horizontallyCentred verticallyCentred'):return place(local('read'+str(len(defs)),[label(0,0,w,h,n=n,ink=ink,just=just)]),key,x,y,w,h)
 MODAL_BUTTON_H=36
 modal_manifest=[]
 def picker(key,titletext,x,y,w=286,h=48):
@@ -210,8 +210,8 @@ def precise_lfo(parts,j,x,y):
   c=art(name,x+456,y+118,140,28);c['bounds']['additionalInvalidatingHandles']=[gate(f'lfo{j}_wave',shape,11)];parts.append(c)
 
 def precise_filter(parts,x,y):
- # Reuse the exact-size gold/violet LFO atlases; only one extra blue atlas.
- strips=[line_atlas('lfo_line_gold_6x96.png',GOLD),line_atlas('filter_line_petrol_6x96.png','#518397'),line_atlas('lfo_line_violet_6x96.png',VIOLET)]
+ # PERF-CANDIDATE.3: combined HPF -> LPF curve only, drawn with the violet LFO atlas (no gold/petrol atlas on this page).
+ strip=line_atlas('lfo_line_violet_6x96.png',VIOLET)
  name='filter_precise_bg.png';im=Image.new('RGB',(600,340));d=ImageDraw.Draw(im)
  for yy in range(340):
   f=yy/339;d.line((0,yy,599,yy),fill=tuple(round(a+(b-a)*f) for a,b in zip((17,18,31),(10,13,22))))
@@ -219,14 +219,15 @@ def precise_filter(parts,x,y):
  for db in [18,0,-24,-48,-60]:
   yy=22+(18-db)/78*287;d.line((12,yy,588,yy),fill='#3b3b49' if db==0 else '#272b37')
  d.text((12,325),'20 Hz',font=font(18),fill='#aab1bf',anchor='lm');d.text((588,325),'20 kHz',font=font(18),fill='#aab1bf',anchor='rm');d.text((300,325),'−60 … +18 dB',font=font(16),fill='#aab1bf',anchor='mm');im.save(A/name);parts.append(art(name,x,y,600,340))
- for curve in range(3):
-  for row in range(3):
-   for i in range(96):
-    n=(curve*3+row)*96+i
-    c=place(local('filterline_'+str(n),[child('Knob',dict(version=5,knobType='FilmStrip',filmStrip=strips[curve],numFrames=5987,invert=False,dragOrientation='Vertical',handleName='Data'),0,0,6,96)]),f'filterline{n}',x+12+i*6,y+22+row*96,6,96)
-    c['bounds']['acceptsHWFocus']='No';parts.append(c)
+ # One shared definition for every column (as on the LFO page); parameters filterline576..863 = curve 2.
+ cell=local('filterline_combined',[child('Knob',dict(version=5,knobType='FilmStrip',filmStrip=strip,numFrames=5987,invert=False,dragOrientation='Vertical',handleName='Data'),0,0,6,96)])
+ for row in range(3):
+  for i in range(96):
+   n=(2*3+row)*96+i
+   c=place(cell,f'filterline{n}',x+12+i*6,y+22+row*96,6,96)
+   c['bounds']['acceptsHWFocus']='No';parts.append(c)
  name='filter_legend.png';im=Image.new('RGB',(600,28),BG);d=ImageDraw.Draw(im)
- for xx,text,ink in [(0,'HPF',GOLD),(160,'LPF','#518397'),(320,'HPF → LPF',VIOLET)]:d.line((xx,14,xx+26,14),fill=ink,width=2);d.text((xx+38,14),text,font=font(18),fill=ink,anchor='lm')
+ for xx,text,ink in [(0,'HPF > LPF',VIOLET)]:d.line((xx,14,xx+26,14),fill=ink,width=2);d.text((xx+38,14),text,font=font(18),fill=ink,anchor='lm')
  im.save(A/name);parts.append(art(name,x,y+406,600,28))
 
 marker_types={}
@@ -258,19 +259,43 @@ def precise_space(parts,x,y,motion=False):
   c['bounds']['acceptsHWFocus']='No';wave_type=local('space_wave_tile',[c])
   for i in range(192):
    key=f'wave{i}' if i<64 else f'wavefine{i}';fine.append(place(wave_type,key,x+12+i%96*6,y+12+96+(i//96)*96,6,96))
- strip=f'pathmask_9x{tileh}.png'
- if not (A/strip).exists():path_atlas(A/strip,9,tileh)
- glyph=child('Knob',dict(version=5,knobType='FilmStrip',filmStrip=strip,numFrames=73922,invert=False,dragOrientation='Vertical',handleName='Data'),0,0,9,tileh);glyph['bounds']['acceptsHWFocus']='No';glyph_type=local(f'path_mask_{tileh}',[glyph])
- for row in range(32):
-  rowparts=[place(glyph_type,path_key(row*64+col),col*9,0,9,tileh) for col in range(64)]
-  c=place(local(f'path_row_{tileh}_{row}',rowparts),f'pathrow{row}',x+12,y+pad+row*tileh,576,tileh,[gate(f'pathrow{row}',1)]);c['bounds']['acceptsHWFocus']='No';fine.append(c)
- parts.append(place(local(f'precise_reveal_{height}',fine),'ui_plot_mode',0,0,1280,628,[gate('ui_plot_mode',0)]))
- # Build-time blur only: no image processing or new notifications during playback.
- blurred=f'space_blurred_{height}.png';blur_image=im.filter(ImageFilter.GaussianBlur(3.2));ImageDraw.Draw(blur_image).text((582,boxh-18),'Processing…',font=font(18),fill='#a4a6b5',anchor='rm');blur_image.save(A/blurred)
- overlay=art(blurred,x,y,600,boxh);overlay['bounds']['additionalInvalidatingHandles']=[gate('ui_plot_mode',1)];parts.append(overlay)
- marker(parts,'origin','x','y',x+12,y+pad,height,GOLD,True)
- marker(parts,'start','path_start_x','path_start_y',x+12,y+pad,height,AZURE)
+ # PERF-CANDIDATE.2: no 2048-tile path raster. Light markers only: X/Y crosshair bound to x/y, and the 12
+ # path points as coloured numbered dots published by the engine (pdot*). The wave keeps its proven 192 strips.
+ # PERF-CANDIDATE.4: the wave stays visible at all times (no blur / Processing overlay, no ui_plot_mode gate);
+ # it refreshes after the gesture while the crosshair and dots follow live.
+ parts.extend(fine)
+ crosshair(parts,x+12,y+pad,height)
+ for i in range(12):point_dot(parts,i,x+12,y+pad,height)
  if motion:marker(parts,'selected','path_selected_x','path_selected_y',x+12,y+pad,height,'#e4c3ff',True)
+
+POINT_COLOURS=['#83bed0','#b195d7','#e284aa','#e8985c','#82c88c','#5abeaf','#c8d26e','#7096e8','#e16262','#cdacf5','#d6b896','#a0e1cd']
+def crosshair(parts,x,y,height):
+ v=f'cross_v_{height}.png'
+ if not (A/v).exists():
+  im=Image.new('RGBA',(12,height));ImageDraw.Draw(im).line((6,0,6,height-1),fill=GOLD,width=1);im.save(A/v)
+ track=f'cross_track_{height}.png'
+ if not (A/track).exists():Image.new('RGBA',(588,height)).save(A/track)
+ key=f'cross_v_{height}'
+ if key not in marker_types:
+  c=child('Slider',dict(version=3,sliderType='TrackAndThumb',direction='Horizontal',thumbImage=v,thumbTrackVisible=False,revealedImage=track,handleName='Data'),0,0,588,height);c['bounds']['acceptsHWFocus']='No';marker_types[key]=local('marker_'+key,[c])
+ c=place(marker_types[key],'x',x-6,y,588,height);c['bounds']['acceptsHWFocus']='No';parts.append(c)
+ h='cross_h.png'
+ if not (A/h).exists():
+  im=Image.new('RGBA',(576,12));ImageDraw.Draw(im).line((0,6,575,6),fill=GOLD,width=1);im.save(A/h)
+ rows=65;step=height/(rows-1)
+ for row in range(rows):
+  c=art(h,x,y+row*step-6,576,12);c['bounds']['additionalInvalidatingHandles']=[gate('y',rows-1-row,rows)];parts.append(c)
+def point_dot(parts,i,x,y,height):
+ thumb=f'dot_{i+1}.png';ink=POINT_COLOURS[i]
+ if not (A/thumb).exists():
+  im=Image.new('RGBA',(40,16));d=ImageDraw.Draw(im);d.ellipse((13,1,27,15),fill='#0e111b');d.ellipse((15,3,25,13),fill=ink);d.text((29,8),str(i+1),font=font(12),fill=ink,anchor='lm');im.save(A/thumb)
+ if not (A/'dot_track.png').exists():Image.new('RGBA',(616,16)).save(A/'dot_track.png')
+ name=f'dot{i}'
+ if name not in marker_types:
+  c=child('Slider',dict(version=3,sliderType='TrackAndThumb',direction='Horizontal',thumbImage=thumb,thumbTrackVisible=False,revealedImage='dot_track.png',handleName='Data'),0,0,616,16);c['bounds']['acceptsHWFocus']='No';marker_types[name]=local('marker_'+name,[c])
+ rows=33;step=height/(rows-1)
+ for row in range(rows):
+  c=place(marker_types[name],f'pdot{i}_x',x-20,y+row*step-8,616,16,[gate(f'pdot{i}_y',rows-1-row,rows),gate(f'pdot{i}_on',1)]);c['bounds']['acceptsHWFocus']='No';parts.append(c)
 
 def pathgraph(parts,x,y,w,h,background=True):
  if background:
@@ -316,7 +341,7 @@ for page,name in enumerate(PAGES):
  parts=[art('background.png',0,0,1280,628)]
  if page==0:
   parts.append(picker('play_mode','PLAY MODE',768,553,326,48));precise_space(parts,20,92)
-  parts.append(readout('table_name',30,518,440,36,22));parts.append(toggle('import_open','IMPORT',486,518,126,36,level1=False));dialgrid(parts,page_keys[page])
+  parts.append(readout('table_name',30,518,440,36,22,just='left verticallyCentred'));parts.append(toggle('import_open','IMPORT',486,518,126,36,level1=False));dialgrid(parts,page_keys[page])
  elif page==1:
   parts.append(picker('path_mode','PATH MODE',768,553,326,48));precise_space(parts,20,92,True)
   parts.append(picker('point_select','POINT',20,384,120,48));parts.extend([dial('point_x','POINT X',152,380,224,110),dial('point_y','POINT Y',388,380,224,110)])
@@ -324,7 +349,7 @@ for page,name in enumerate(PAGES):
  elif page==2:
   parts.append(title('AMPLITUDE',20,72));native_envelope(parts,'amp',20,114,600,176);parts.append(title('FILTER ENVELOPE',20,318));native_envelope(parts,'filter',20,360,600,176);dialgrid(parts,page_keys[page])
  elif page==3:
-  parts.append(picker('filter_model','FILTER CHARACTER',768,553,326,48));parts.append(title('HIGH PASS → LOW PASS',20,74));precise_filter(parts,20,124);parts.append(title('STATIC · SMALL SIGNAL · ENV / MOD OFF',28,488,590,18));dialgrid(parts,page_keys[page])
+  parts.append(picker('filter_model','FILTER CHARACTER',768,553,326,48));parts.append(title('HIGH PASS > LOW PASS',20,74));precise_filter(parts,20,124);parts.append(title('STATIC · SMALL SIGNAL · ENV / MOD OFF',28,488,590,18));dialgrid(parts,page_keys[page])
  elif page==4:
   # Both LFOs share one page, with independent shape and clock selectors.
   for j,y in [(1,72),(2,328)]:
@@ -398,7 +423,7 @@ for j in [1,2]:
  for physical,key in zip([13,9,5,1,14,10,6,2,15,11,7,3,16,12,8,4],keys):mapping[f'Q-Link {physical}']=I[key]
  ql.append({'Tab':5,'SubTab':j+1,'Bank Direction':'Column','Q-Links':mapping})
 for name in ['Q-Links.json','Q-Links - 8by1.json','Q-Links - 4by4.json']:(A/name).write_text(json.dumps({'version':4,'info':{'version':1,'type':'CompleteDescription'},'Screen Mode Q-Links':{'version':4,'map':ql},'Program Mode Q-Links':ql[0]['Q-Links']},indent=2))
-(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.2.0</version></plugincontent>\n')
+(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.3.0</version></plugincontent>\n')
 # Pad every small regular Image, including LFO headers/toggles/cycle indicators,
 # MOD row numbers and compact panel choices. Keep native clipping geometry intact.
 padded=[]

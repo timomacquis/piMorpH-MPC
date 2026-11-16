@@ -142,6 +142,8 @@ typedef struct {
     double host_sample_rate;
     volatile int holdFrames[NPARAMS];  /* momentary params: frames left before reporting back to 0 (hold_ms) */
     volatile char changed[NPARAMS];  /* params the plugin changed itself (step_of on an option), to report */
+    uint32_t vis_bits[NPARAMS];      /* PERF-CANDIDATE.2: last engine-published value of passive graphics params (float bits) */
+    unsigned char vis_ok[NPARAMS];   /* PERF-CANDIDATE.2: 1 once vis_bits[i] holds a published value */
     float last_pos[NPARAMS]; /* stepped params: the last position the host asked for, in steps (-1 = none yet) */
     float qacc[NPARAMS];     /* qlink_ticks: turn events counted toward the next step (see setParameter) */
     signed char last_on[NPARAMS];  /* last "<key>_on" value told to the host, +1 (0 = unknown, -1 = the engine has no such key) */
@@ -149,6 +151,9 @@ typedef struct {
 #ifdef PICN_GRAPHICS_REPORT_FRAMES
     int plot_reveal_wait;
     int graphics_report; /* Heavy chart values only; markers keep the normal budget. */
+#endif
+#ifdef PICN_FAST_BUDGET
+    int fast_cursor; /* PERF-CANDIDATE.4: own round-robin for the FILTER curve values */
 #endif
     int on_poll, text_poll;        /* frames until the next "<key>_on" poll / readout poll (see housekeeping) */
     int playing;             /* HAS_TRANSPORT: last transport state sent */
@@ -227,11 +232,30 @@ static float str_to_norm(const param_t *p, const char *s) {
     return p->max > p->min ? clamp01((float)((atof(s) - p->min) / (p->max - p->min))) : 0;
 }
 
+/* PERF-CANDIDATE.2: passive graphics values (thousands of chart cells) are read by the host on every page build.
+ * Serve them from a cache filled when the engine publishes them, instead of taking the engine lock that the audio
+ * render also needs. Values the engine has not published yet still go through the locked path. */
+static int vis_cacheable(int i) {
+    if (i <= 0 || i >= NPARAMS || !PICN_VISUAL_CLASS[i] || popup_is(i) || PARAMS[i].string_display) return 0;
+#ifdef PICN_PLOT_MODE_PARAM
+    if (i == PICN_PLOT_MODE_PARAM) return 0;
+#endif
+    return 1;
+}
+static void vis_store(wrap_t *w, int i, float v) {
+    uint32_t b; memcpy(&b, &v, sizeof b);
+    __atomic_store_n(&w->vis_bits[i], b, __ATOMIC_RELAXED);
+    __atomic_store_n(&w->vis_ok[i], 1, __ATOMIC_RELEASE);
+}
+
 static float get_norm(wrap_t *w, int i) {
     char buf[64];
     if (i < 0 || i >= NPARAMS) return 0;
     if (i == 0 && __atomic_load_n(&w->has_pend0, __ATOMIC_ACQUIRE)) return w->pend0;   /* set, not applied yet */
     if (popup_is(i)) return w->open[i];
+    if (vis_cacheable(i) && __atomic_load_n(&w->vis_ok[i], __ATOMIC_ACQUIRE)) {
+        uint32_t b = __atomic_load_n(&w->vis_bits[i], __ATOMIC_RELAXED); float v; memcpy(&v, &b, sizeof v); return v;
+    }
     if (PARAMS[i].string_display) {
         /* a text param's value is not its text: a DSP may expose "<key>_on" (list-tile selection) */
         char k2[96];
@@ -511,10 +535,11 @@ static void housekeeping(AEffect *e, int32_t n) {
     /* A trigger param (e.g. Generate) fired: tell the host it is back to 0 so
      * buttons bound to it drop their highlight. Done here, not inside
      * setParameter, so the host is not re-entered from its own call. */
-    for (int i = 0; i < NPARAMS; i++)
+    /* PERF-CANDIDATE.1: one pass instead of two over NPARAMS per block (same per-parameter order: hold reset, then change). */
+    for (int i = 0; i < NPARAMS; i++) {
         if (w->holdFrames[i] > 0 && (w->holdFrames[i] -= n) <= 0) { w->holdFrames[i] = 0; w->master(&w->fx, audioMasterAutomate, i, 0, 0, 0.0f); }
-    for (int i = 0; i < NPARAMS; i++)
         if (w->changed[i]) { w->changed[i] = 0; w->master(&w->fx, audioMasterAutomate, i, 0, 0, get_norm(w, i)); }
+    }
     /* Text params are polled, not only read after a screen tap, because MIDI alone can change them (a pad plays
      * a chord, nothing on screen touched):
      * - list-tile selection ("<key>_on"), every 10 ms: the host doesn't re-read a button's value on UpdateDisplay,
@@ -589,6 +614,10 @@ static void housekeeping(AEffect *e, int32_t n) {
                 else if (cmp > 0) hi = mid;
                 else {
                     w->last_pos[i] = -1;
+                    if (vis_cacheable(i)) {   /* PERF-CANDIDATE.2: lock already held here, call the engine directly */
+                        char vb[64];
+                        if (g_api->get_param(w->dsp, PARAMS[i].key, vb, sizeof vb) > 0) vis_store(w, i, str_to_norm(&PARAMS[i], vb));
+                    }
                     w->cc_changed[i] = 1;
                     /* piToniC: native bound values handle enum changes without rebuilding the page. */
                     break;
@@ -634,6 +663,9 @@ static void housekeeping(AEffect *e, int32_t n) {
 #ifdef PICN_PLOT_MODE_PARAM
             if (i == PICN_PLOT_MODE_PARAM) continue;
 #endif
+#ifdef PICN_FAST_BUDGET
+            if (i >= PICN_FAST_FIRST && i < PICN_FAST_FIRST + PICN_FAST_COUNT) continue; /* delivered just below */
+#endif
             if (w->cc_changed[i]) {
 #ifdef PICN_GRAPHICS_REPORT_FRAMES
                 if (PICN_VISUAL_CLASS[i] == 1 && w->graphics_report > 0) { w->cc_delivery_active = 1; continue; }
@@ -646,6 +678,19 @@ static void housekeeping(AEffect *e, int32_t n) {
         }
         if (sent == PICN_NOTIFICATION_BUDGET) w->cc_delivery_active = 1;
     }
+#ifdef PICN_FAST_BUDGET
+    /* PERF-CANDIDATE.4: the FILTER curve gets its own small budget per block, outside the heavy-graphics
+     * spacing and the ordinary budget, so the line follows the knobs. Values are read lock-free (vis cache). */
+    for (int k = 0, fast_sent = 0; k < PICN_FAST_COUNT && fast_sent < PICN_FAST_BUDGET; k++) {
+        int i = PICN_FAST_FIRST + w->fast_cursor;
+        w->fast_cursor = (w->fast_cursor + 1) % PICN_FAST_COUNT;
+        if (w->cc_changed[i]) {
+            w->cc_changed[i] = 0;
+            w->master(&w->fx, audioMasterAutomate, i, 0, 0, get_norm(w, i));
+            fast_sent++;
+        }
+    }
+#endif
 #ifdef PICN_GRAPHICS_REPORT_FRAMES
     /* Reveal only when the producer is drained AND every chart value has been
      * delivered. Other independent curves need not delay the chart. */

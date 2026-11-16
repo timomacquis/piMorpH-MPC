@@ -32,12 +32,11 @@ Les captures montrent le skin sur la Force avant le changement de banque ; les n
 
 Le dessin aide à se repérer :
 
-- **Violet** : un passage du trajet avec son orbite.
 - **Gris** : l’onde à la position XY choisie.
-- **Doré** : l’origine XY.
-- **Azur** : le départ du parcours représenté, pas un suivi des notes jouées.
+- **Croix dorée** : l’origine XY.
+- **Points colorés et numérotés** : les points du trajet, autour de l’origine selon PATH DEPTH. Chaque point garde sa couleur sur SPACE et MOTION (1 azur, 2 violet, 3 rose, 4 orange, 5 vert, 6 turquoise, 7 anis, 8 bleu, 9 rouge, 10 lilas, 11 sable, 12 menthe).
 
-Pendant une manipulation, le repère d’origine bouge sans reconstruire tout le dessin. Après l’arrêt, **Processing…** accompagne brièvement sa préparation, puis le nouveau tracé apparaît complet.
+La croix et les points suivent les réglages en direct. L’onde reste affichée et se redessine peu après l’arrêt du geste.
 
 **TRANSPOSE** change le registre, de −24 à +24 demi-tons.
 
@@ -106,7 +105,7 @@ Une orbite elliptique s’ajoute au trajet :
 
 Pour construire le trajet, ouvre le sélecteur numéroté, choisis un point et ajuste **POINT X / Y**. **ADD POINT / REMOVE POINT** modifient leur nombre ; **PATH POINTS** le règle directement, entre **2 et 12**.
 
-Les positions restent dans les limites de l’espace XY. Le dessin montre un aperçu du parcours, pas les huit voix en temps réel.
+Les positions restent dans les limites de l’espace XY. La vue montre les points colorés du trajet et un anneau sur le point sélectionné ; l’orbite n’est pas dessinée, et la vue ne suit pas les huit voix en temps réel.
 
 ## 4. ENVELOPES — Sculpter la note
 
@@ -147,7 +146,7 @@ Le son traverse **HP → LP** : passe-haut, puis passe-bas.
 
 Le bouton du bas propose **BYPASS**, **MS STYLE MK1** et **MS STYLE MK2**. En BYPASS, la chaîne de filtres et son drive sont contournés.
 
-Les courbes séparent **HPF doré**, **LPF bleu** et **réponse combinée violette**. C’est une réponse statique autour du silence : elle ne représente pas les variations dues aux enveloppes, aux modulations ou à la saturation.
+La courbe violette montre la réponse combinée passe-haut → passe-bas et suit les réglages pendant qu’on les tourne. C’est une réponse statique autour du silence : elle ne représente pas les variations dues aux enveloppes, aux modulations ou à la saturation.
 
 ## 6. LFO — Ajouter du mouvement
 

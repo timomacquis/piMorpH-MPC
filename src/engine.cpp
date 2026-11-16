@@ -32,6 +32,9 @@ using Values=std::array<double,pmmeta::Count>;
 const auto& indexMap(){static const auto map=[](){std::unordered_map<std::string_view,int> m;for(int i=0;i<pmmeta::Count;i++)m.emplace(pmmeta::params[i].key,i);return m;}();return map;}
 int id(std::string_view key){auto it=indexMap().find(key);return it==indexMap().end()?-1:it->second;}
 const auto& importIndices(){static const auto a=[](){std::array<int,12>a{};const char*names[]={"import_open","import_phase","import_status","table_name","browse_path","browse_page","browse_item0","browse_item1","browse_item2","browse_item3","browse_item4","browse_item5"};for(int i=0;i<12;i++)a[i]=id(names[i]);return a;}();return a;}
+const auto& lfoLineIndices(){static const auto indices=[](){std::array<std::array<int,PreviewColumns>,2> a{};char key[40];for(int j=0;j<2;j++)for(int g=0;g<PreviewColumns;g++){snprintf(key,sizeof key,"lfo%dline%d",j+1,g);a[j][g]=id(key);}return a;}();return indices;}
+const auto& dotIndices(){static const auto a=[](){std::array<int,36> d{};char k[24];for(int i=0;i<12;i++){snprintf(k,sizeof k,"pdot%d_x",i);d[i*3]=id(k);snprintf(k,sizeof k,"pdot%d_y",i);d[i*3+1]=id(k);snprintf(k,sizeof k,"pdot%d_on",i);d[i*3+2]=id(k);}return d;}();return a;}
+const auto& dotSources(){static const auto a=[](){std::array<int,28> s{};s[0]=id("x");s[1]=id("y");s[2]=id("path_depth");s[3]=id("point_count");char k[24];for(int i=0;i<12;i++){snprintf(k,sizeof k,"point%d_x",i);s[4+i*2]=id(k);snprintf(k,sizeof k,"point%d_y",i);s[5+i*2]=id(k);}return s;}();return a;}
 const auto& filterIndices(){static const auto indices=[](){std::array<int,FilterCodes> a{};char key[40];for(int i=0;i<FilterCodes;i++){snprintf(key,sizeof key,"filterline%d",i);a[i]=id(key);}return a;}();return indices;}
 struct PlotIndices{std::array<int,PathTiles> path{};std::array<int,192>wave{};std::array<int,PathRows>rows{};std::array<int,4>markers{};};
 const auto& plotIndices(){static const auto result=[](){PlotIndices p;char k[48];for(int i=0;i<PathTiles;i++){if(i<384)snprintf(k,sizeof k,"pathseg%d_%d",i/32,i%32);else snprintf(k,sizeof k,"pathtile%d",i);p.path[i]=id(k);}for(int i=0;i<192;i++){snprintf(k,sizeof k,i<64?"wave%d":"wavefine%d",i);p.wave[i]=id(k);}for(int i=0;i<PathRows;i++){snprintf(k,sizeof k,"pathrow%d",i);p.rows[i]=id(k);}const char*names[]={"path_start_x","path_start_y","path_selected_x","path_selected_y"};for(int i=0;i<4;i++)p.markers[i]=id(names[i]);return p;}();return result;}
@@ -133,11 +136,14 @@ struct Instance{
    auto publish=[&](int i,double value){if(p[i]!=value){p[i]=value;changed.set(i);}};
    const auto& pi=plotIndices();bool plotDirty=false;
    auto plotPublish=[&](int i,double value){if(p[i]!=value){publish(i,value);plotDirty=true;}};
-   if(n->draft){const auto& di=draftIndices();for(int g=0;g<DraftTiles;g++)publish(di[g],n->draftPath.cells[g]);}
-   else{for(int g=0;g<PathTiles;g++)plotPublish(pi.path[g],n->trajectory.codes[g]);for(int g=0;g<192;g++)plotPublish(pi.wave[g],n->waveLine[g]);for(int g=0;g<PathRows;g++)plotPublish(pi.rows[g],n->trajectory.activeRows[g]);if(plotDirty)publish(PlotMode,1);}
+   // PERF-CANDIDATE.3: no skin component shows the path tiles, rows or draft cells any more; only the wave is published.
+   if(!n->draft){for(int g=0;g<192;g++)plotPublish(pi.wave[g],n->waveLine[g]);if(plotDirty)publish(PlotMode,1);}
    double marks[]={n->trajectory.start.x,n->trajectory.start.y,n->trajectory.selected.x,n->trajectory.selected.y};for(int g=0;g<4;g++)publish(pi.markers[g],marks[g]*100);
-   const auto& fi=filterIndices();for(int g=0;g<FilterCodes;g++)publish(fi[g],n->filterLine[g]);
-   for(int j=0;j<2;j++)for(int g=0;g<PreviewColumns;g++){char key[40];snprintf(key,sizeof key,"lfo%dline%d",j+1,g);publish(id(key),n->lfoLine[j][g]);}
+   // PERF-CANDIDATE.2: effective control-point positions, same formula as Synth::position (X/Y + (p - .5) * depth), no orbit.
+   {const auto& ds=dotSources();const auto& dd=dotIndices();double X=p[ds[0]]/100,Y=p[ds[1]]/100,depth=p[ds[2]]/100;int count=(int)p[ds[3]];for(int i=0;i<12;i++){bool on=i<count;double ex=std::clamp(X+(p[ds[4+i*2]]/100-.5)*depth,0.,1.),ey=std::clamp(Y+(p[ds[5+i*2]]/100-.5)*depth,0.,1.);publish(dd[i*3],on?ex*100:0);publish(dd[i*3+1],on?ey*100:0);publish(dd[i*3+2],on?1:0);}}
+   // PERF-CANDIDATE.3: FILTER shows only the combined HPF -> LPF curve (the last 288 codes).
+   const auto& fi=filterIndices();for(int g=FilterCodes-FilterColumns*FilterRows;g<FilterCodes;g++)publish(fi[g],n->filterLine[g]);
+   const auto& li=lfoLineIndices();for(int j=0;j<2;j++)for(int g=0;g<PreviewColumns;g++)publish(li[j][g],n->lfoLine[j][g]);
   }
   int previousLoaded=loaded,previousError=error;
   if(!active||active->bank!=n->bank||active->table.get()!=n->table.get()){synth.setTable(n->table.get());mark("table_name");loaded=n->table?n->bank:-1;}
@@ -154,13 +160,14 @@ struct Instance{
   }
   o.filterLine=filterCached?*filterCached:filterPreview(get("hp_cutoff"),get("hp_res")/100,get("lp_cutoff"),get("lp_res")/100,(int)get("filter_model"),std::exp2(get("drive")/25));
   auto makePatch=[&](){Patch q;static const double beats[]={.25,.5,1,2,4,8,16};q.x=get("x")/100;q.y=get("y")/100;q.mode=(int)get("path_mode");q.pathBars=beats[(int)get("path_rate")]/4;q.orbitBars=beats[(int)get("orbit_rate")]/4;q.pathDepth=get("path_depth")/100;q.orbitWidth=get("orbit_width")/100;q.orbitHeight=get("orbit_height")/100;q.orbitPhase=get("orbit_phase")/360;q.pathOffset=get("path_offset")/100;q.pointCount=(int)get("point_count");char key[40];for(int i=0;i<12;i++){snprintf(key,sizeof key,"point%d_x",i);q.points[i].x=get(key)/100;snprintf(key,sizeof key,"point%d_y",i);q.points[i].y=get(key)/100;}return q;};
-  if(s.draft){o.draftPath=draftCached?*draftCached:trajectoryDraft(makePatch(),(int)get("point_select"));o.trajectory.start=o.draftPath.start;o.trajectory.selected=o.draftPath.selected;}
-  else{if(pathCached)o.trajectory=*pathCached;else o.trajectory=trajectoryPreview(makePatch(),(int)get("point_select"),pathScratch);o.waveLine=waveCached?*waveCached:wavePreview(o.table.get(),get("x")/100,get("y")/100);}
+  // PERF-CANDIDATE.3: markers only (same formulas as trajectoryPreview/trajectoryDraft), no path raster. Display only, never read by the DSP.
+  {auto q=makePatch();Synth projection;projection.patch=q;o.trajectory.start=projection.position(0);o.trajectory.selected=pathAnchor(q,std::clamp((int)get("point_select"),0,11));}
+  if(!s.draft)o.waveLine=waveCached?*waveCached:wavePreview(o.table.get(),get("x")/100,get("y")/100);
 
  }
  void work(){unsigned checked=0;std::shared_ptr<pf::Wavetable> checkedTable;std::string checkedPath;std::uintmax_t checkedSize=0;std::filesystem::file_time_type checkedTime{};
   auto fingerprint=[](const std::string&path,std::uintmax_t&size,std::filesystem::file_time_type&time){std::error_code ec;size=std::filesystem::file_size(path,ec);if(ec)return false;time=std::filesystem::last_write_time(path,ec);return !ec;};
-  unsigned cacheSource=0;unsigned done=0;int cacheBank=-1;std::string cachePath;std::shared_ptr<pf::Wavetable> cache;std::array<double,6> filterSettings{};FilterPreview filterCache{};bool filterValid=false;std::array<double,36> pathSettings{};TrajectoryPreview pathCache;bool pathValid=false;std::array<double,36> draftSettings{};TrajectoryDraft draftCache;bool draftValid=false;std::array<double,2> waveXY{};WavePreview waveCache{};std::shared_ptr<pf::Wavetable>waveTable;bool waveValid=false;auto pathScratch=std::make_unique<TrajectoryScratch>();
+  unsigned cacheSource=0;unsigned done=0;int cacheBank=-1;std::string cachePath;std::shared_ptr<pf::Wavetable> cache;std::array<double,6> filterSettings{};FilterPreview filterCache{};bool filterValid=false;std::array<double,2> waveXY{};WavePreview waveCache{};std::shared_ptr<pf::Wavetable>waveTable;bool waveValid=false;TrajectoryScratch* pathScratch=nullptr;// PERF-CANDIDATE.3: no path raster
   while(!stop){delete checkRetired.exchange(nullptr);delete retired.exchange(nullptr);browser.work();
    unsigned serial=checkSerial.load();if(serial!=checked){std::string path;{std::lock_guard<std::mutex>l(checkMutex);path=checkPath;}checked=serial;
     if(!path.empty()&&checkEnabled){checkCancel=false;auto result=std::make_unique<ImportCheck>();result->serial=serial;result->path=path;auto table=std::make_shared<pf::Wavetable>();int frame=0;std::string why;std::uintmax_t size=0;std::filesystem::file_time_type time{};
@@ -187,10 +194,10 @@ struct Instance{
     if(stop)break;if(sourceSerial.load()!=job.source)continue;
     if(ok){cache=t;cacheBank=job.bank;cachePath=path;cacheSource=job.source;}else{pub->error=1;pub->message=why=="silent"?"Silent table (check stereo phase)":why.empty()?"Table unavailable":why;Publication*old=ready.exchange(pub.release());delete old;continue;}}
    std::array<double,6> fs{};const char* fk[]={"hp_cutoff","hp_res","lp_cutoff","lp_res","filter_model","drive"};for(int i=0;i<6;i++)fs[i]=job.values[id(fk[i])];
-   std::array<double,36> ps{};const char* pk[]={"x","y","path_mode","path_rate","path_depth","orbit_rate","orbit_width","orbit_height","orbit_phase","path_offset","point_count","point_select"};for(int i=0;i<12;i++)ps[i]=job.values[id(pk[i])];char key[40];for(int i=0;i<24;i++){snprintf(key,sizeof key,"point%d_%c",i/2,i%2?'y':'x');ps[12+i]=job.values[id(key)];}
+   // PERF-CANDIDATE.3: path settings cache removed with the path raster.
    std::array<double,2> xy={job.values[id("x")],job.values[id("y")]};
-   pub->table=cache;graphs(*pub,job,filterValid&&fs==filterSettings?&filterCache:nullptr,pathValid&&ps==pathSettings?&pathCache:nullptr,waveValid&&xy==waveXY&&waveTable==cache?&waveCache:nullptr,pathScratch.get(),draftValid&&ps==draftSettings?&draftCache:nullptr);
-   filterCache=pub->filterLine;filterSettings=fs;filterValid=true;if(job.draft){draftCache=pub->draftPath;draftSettings=ps;draftValid=true;}else{pathCache=pub->trajectory;pathSettings=ps;pathValid=true;waveCache=pub->waveLine;waveXY=xy;waveTable=cache;waveValid=true;}Publication*old=ready.exchange(pub.release());delete old;
+   pub->table=cache;graphs(*pub,job,filterValid&&fs==filterSettings?&filterCache:nullptr,nullptr,waveValid&&xy==waveXY&&waveTable==cache?&waveCache:nullptr,pathScratch,nullptr);
+   filterCache=pub->filterLine;filterSettings=fs;filterValid=true;if(!job.draft){waveCache=pub->waveLine;waveXY=xy;waveTable=cache;waveValid=true;}Publication*old=ready.exchange(pub.release());delete old;
    std::this_thread::sleep_for(std::chrono::milliseconds(70));
   }
  }
@@ -227,4 +234,4 @@ void song(void*p,double ppq,double bpm,int playing,int){auto&e=*static_cast<Inst
 const mpc_engine_t api={create,destroy,midi,set,get,render,nullptr,song};
 }
 extern "C" const mpc_engine_t* mpc_engine(){return &api;}
-extern "C" int mpc_engine_changed(void*p,char*k,int n){auto&e=*static_cast<Instance*>(p);if(e.changed[PlotMode]){e.changed.reset(PlotMode);snprintf(k,n,"ui_plot_mode");return 1;}for(int a:importIndices())if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}if(e.changed.none())return 0;for(int i=0;i<pmmeta::Count;i++){int a=e.notifyCursor++%pmmeta::Count;if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}}return 0;}
+extern "C" int mpc_engine_changed(void*p,char*k,int n){auto&e=*static_cast<Instance*>(p);if(e.changed[PlotMode]){e.changed.reset(PlotMode);snprintf(k,n,"ui_plot_mode");return 1;}for(int a:importIndices())if(e.changed[a]){e.changed.reset(a);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}if(e.changed.none())return 0;size_t start=(size_t)e.notifyCursor%pmmeta::Count;size_t a=e.changed[start]?start:e.changed._Find_next(start);if(a>=(size_t)pmmeta::Count)a=e.changed._Find_first();if(a>=(size_t)pmmeta::Count)return 0;e.changed.reset(a);e.notifyCursor=(int)((a+1)%pmmeta::Count);snprintf(k,n,"%s",pmmeta::params[a].key);return 1;}

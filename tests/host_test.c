@@ -5,11 +5,12 @@
 static int updates,notifications,alias_notifications,mode_events;
 static float last_mode;
 static int chart_events;
-static int test_frames,last_heavy_frame=-100000,heavy_events;
+static int fast_events;static int test_frames,last_heavy_frame=-100000,heavy_events;
 static VstTimeInfo ti={.tempo=120,.flags=kVstTempoValid};
 static intptr_t host(AEffect*a,int32_t op,int32_t i,intptr_t v,void*p,float f){(void)a;(void)i;(void)v;(void)p;(void)f;if(op==42)updates++;if(op==audioMasterAutomate){notifications++;if(PICN_PLOT_VALUE[i]){assert(last_mode==1);chart_events++;}
 #ifdef PICN_GRAPHICS_REPORT_FRAMES
-if(PICN_VISUAL_CLASS[i]==1){assert(test_frames-last_heavy_frame>=PICN_GRAPHICS_REPORT_FRAMES);last_heavy_frame=test_frames;heavy_events++;}
+if(i>=PICN_FAST_FIRST&&i<PICN_FAST_FIRST+PICN_FAST_COUNT)fast_events++;/* PERF-CANDIDATE.4: own budget */
+else if(PICN_VISUAL_CLASS[i]==1){assert(test_frames-last_heavy_frame>=PICN_GRAPHICS_REPORT_FRAMES);last_heavy_frame=test_frames;heavy_events++;}
 #endif
 if(i==PICN_PLOT_MODE_PARAM){mode_events++;last_mode=f;if(f<.5f){wrap_t*w=a->object;for(int j=0;j<NPARAMS;j++)assert(!PICN_PLOT_VALUE[j]||!w->cc_changed[j]);}}if(!strcmp(PARAMS[i].key,"point_x")||!strcmp(PARAMS[i].key,"point_y")||!strncmp(PARAMS[i].key,"slot_",5))alias_notifications++;if(PICN_PLOT_VALUE[i]){assert(last_mode==1);chart_events++;}}if(op==audioMasterGetTime)return (intptr_t)&ti;return 0;}
 static int param(const char*key){for(int i=0;i<NPARAMS;i++)if(!strcmp(PARAMS[i].key,key))return i;assert(0);return -1;}
@@ -27,12 +28,15 @@ int main(){AEffect*a=VSTPluginMain(host),*b=VSTPluginMain(host);assert(a&&b&&a->
  for(int k=0;k<32;k++){a->setParameter(a,param("x"),k/31.f);a->setParameter(a,param("filter_model"),(k%3)/2.f);block(a,out);}assert(updates==0);
  // Sustained filter drag after startup/preset queues have drained.
  for(int i=0;i<2400;i++){block(a,out);usleep(1000);}
- int max_callbacks=0,total_callbacks=0;alias_notifications=0;updates=0;
+ int max_callbacks=0,total_callbacks=0,max_fast=0,total_fast=0;alias_notifications=0;updates=0;
  for(int i=0;i<360;i++){
   if(i%4==0)a->setParameter(a,param("hp_cutoff"),(i%100)/100.f);
-  notifications=0;block(a,out);if(notifications>max_callbacks)max_callbacks=notifications;total_callbacks+=notifications;usleep(2000);
+  notifications=0;fast_events=0;block(a,out);assert(fast_events<=PICN_FAST_BUDGET);if(fast_events>max_fast)max_fast=fast_events;total_fast+=fast_events;notifications-=fast_events;if(notifications>max_callbacks)max_callbacks=notifications;total_callbacks+=notifications;usleep(2000);
  }
- printf("FILTER notification stress: max/block=%d total=%d unrelated-alias=%d update-display=%d\n",max_callbacks,total_callbacks,alias_notifications,updates);
+ /* the worker may publish the curve after the drag: keep counting until it is delivered */
+ int drain=0;for(;drain<1500;drain++){fast_events=0;block(a,out);assert(fast_events<=PICN_FAST_BUDGET);if(fast_events>max_fast)max_fast=fast_events;total_fast+=fast_events;usleep(2000);if(!fast_events&&total_fast>0&&drain>40)break;}
+ printf("FILTER notification stress: ordinary max/block=%d total=%d; filter curve max/block=%d (budget %d) total=%d; unrelated-alias=%d update-display=%d\n",max_callbacks,total_callbacks,max_fast,PICN_FAST_BUDGET,total_fast,alias_notifications,updates);
+ assert(max_fast<=PICN_FAST_BUDGET&&total_fast>0);
  assert(updates==0);
 #if PICN_NOTIFICATION_BUDGET <= 2
  assert(max_callbacks<=2);assert(alias_notifications==0);

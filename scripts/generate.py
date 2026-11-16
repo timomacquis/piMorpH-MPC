@@ -40,17 +40,20 @@ for key in ['import_open','browse_up','browse_root','browse_user','browse_prev',
  P.append(dict(key=key,name=key.upper(),min=0,max=1,default=0,dynamic_display=True,poll=False,momentary=key.startswith('browse_') and key not in ['browse_path','browse_page']))
 P.append(dict(key='import_phase',name='IMPORT STATUS',min=0,max=4,default=0,poll=False))
 P.append(dict(key='table_name',name='WAVETABLE',min=0,max=1,default=0,dynamic_display=True,poll=False))
+# PERF-CANDIDATE.2: append-only effective positions of the 12 path points (light SPACE/MOTION markers).
+for i in range(12):
+ for k in ['x','y','on']:P.append(dict(key=f'pdot{i}_{k}',name='Point marker',min=0,max=1 if k=='on' else 100,default=0,poll=False))
 assert len(P)<=4096, 'Force native skin handles must fit indices 0..4095'
 keys=[p['key'] for p in P];lock=B/'params.lock'
 if lock.exists():assert keys[:len(old:=lock.read_text().splitlines())]==old,'parameter prefix changed'
 lock.write_text('\n'.join(keys)+'\n');(B/'params.json').write_text(json.dumps(P,indent=2)+'\n');(B/'build').mkdir(exist_ok=True)
-config=dict(name='πMorpH',vendor='Timo',uid='PiMH',version=102,so='pimorph.so',params='params.json',custom_skin=True,cc=False,nrpn=False,defines=dict(SAMPLE_ACCURATE=1,HAS_SONG_POS=1,PARAM_TEXT_MAX=128,MPC_CHUNK_BYTES=32768,PICN_NOTIFICATION_BUDGET=2,PICN_GRAPHICS_REPORT_FRAMES=256,PICN_PLOT_MODE_PARAM=keys.index('ui_plot_mode'),MODULE_SUBDIR='"."',PIMORPH_FACTORY_PROGRAMS=1))
+config=dict(name='πMorpH',vendor='Timo',uid='PiMH',version=103,so='pimorph.so',params='params.json',custom_skin=True,cc=False,nrpn=False,defines=dict(SAMPLE_ACCURATE=1,HAS_SONG_POS=1,PARAM_TEXT_MAX=128,MPC_CHUNK_BYTES=32768,PICN_NOTIFICATION_BUDGET=2,PICN_GRAPHICS_REPORT_FRAMES=256,PICN_PLOT_MODE_PARAM=keys.index('ui_plot_mode'),PICN_FAST_FIRST=keys.index('filterline576'),PICN_FAST_COUNT=288,PICN_FAST_BUDGET=8,MODULE_SUBDIR='"."',PIMORPH_FACTORY_PROGRAMS=1))
 (B/'vst.json').write_text(json.dumps(config,ensure_ascii=False,indent=2)+'\n');cfg=gen_vst.load(str(B/'vst.json'));gen_vst.gen_params(cfg,P,str(B/'build/params.h'))
 with (B/'build/params.h').open('a') as out:out.write('\nstatic const unsigned char PICN_AUTOMATABLE[NPARAMS]={'+','.join('1' if p['key'] in {f['key'] for f in FIELDS} and p['key'] not in ['point_select','slot_select'] else '0' for p in P)+'};\n')
 # Separate fine graphics from lightweight markers without moving parameters.
 import re
 def visual_class(key):
- if key=='ui_plot_mode' or key in ['path_start_x','path_start_y','path_selected_x','path_selected_y']:return 2
+ if key=='ui_plot_mode' or key in ['path_start_x','path_start_y','path_selected_x','path_selected_y'] or re.fullmatch(r'pdot\d+_(?:x|y|on)',key):return 2
  return int(bool(re.fullmatch(r'(?:wave|wavefine|path|ampgraph|filtergraph|response|lfo[12]graph|lfo[12]line|filterline|pathtile|pathrow|pathdraft)\d+|pathseg\d+_\d+',key)))
 with (B/'build/params.h').open('a') as out:out.write('static const unsigned char PICN_VISUAL_CLASS[NPARAMS]={'+','.join(str(visual_class(p['key'])) for p in P)+'};\n')
 def plot_value(key):return int(bool(re.fullmatch(r'(?:wave|wavefine|pathtile|pathrow)\d+|pathseg\d+_\d+',key)))

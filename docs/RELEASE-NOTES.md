@@ -1,3 +1,17 @@
+# πMorpH 0.1.3 — Smoother display
+
+Force Gen1 / ARM32 release, with an untested Gen2 ARM64 variant. **Sound, presets and projects are unchanged**: the synthesis code is identical to 0.1.2, and 0.1.2 projects reopen with the same sound.
+
+- **SPACE**: lighter view. The 2,048-tile path drawing is removed. A gold cross shows X/Y and the path points appear as coloured, numbered dots; both follow the controls live. The blur and *Processing…* overlay are gone: the waveform stays visible and is redrawn after the gesture. The table name is left-aligned under the view.
+- **MOTION**: same coloured, numbered points (one colour per point on both pages) and a ring on the selected point.
+- **FILTER**: a single violet combined HP → LP response, which now follows the knobs smoothly (its values have their own small per-block budget). Title and legend now read **HIGH PASS > LOW PASS** / **HPF > LPF**: the device font has no arrow glyph.
+- Lower CPU and memory: the engine no longer computes the hidden path tiles; graphics reads no longer take the lock shared with audio rendering; skin images reduced from 155 MB to 89 MB decoded.
+- 36 passive display parameters appended (4,065 total); existing indices are unchanged.
+
+PC validation: sanitized native engine and wrapper tests, notification budgets, skin references, and an A/B render showing byte-identical audio before and after the display changes. The candidate build was installed and used on Force Gen1.
+
+---
+
 # πMorpH 0.1.2 — Custom Wavetable
 
 Import your own wavetables from the device drives. Force Gen1 / ARM32 release.

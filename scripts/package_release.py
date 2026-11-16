@@ -6,7 +6,7 @@ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 promotion_path=B/'Validation/RELEASE-PROMOTION.json'
 promotion=json.loads(promotion_path.read_text()) if promotion_path.exists() else {}
 RELEASE_VERSION=VERSION.split('-')[0]
-assert RELEASE_VERSION=='0.1.2'
+assert RELEASE_VERSION=='0.1.3'
 assert Path(B/'Validation/IMPORT-TEST.json').exists()
 for name in ['NATIVE-TEST.txt','HOST-TEST.txt']:assert 'PASS:' in (B/'Validation'/name).read_text()
 audio=json.loads((B/'Validation/Factory-Sounds/AUDIO-CHECK.json').read_text());assert len(audio['results'])==101 and all(r['clipped_samples']==0 and r['peak']>12 for r in audio['results'])
@@ -20,6 +20,10 @@ shutil.copytree(B/'Wavetables',stage/'Wavetables');shutil.copytree(B/'docs',stag
 shutil.copy2(B/'LICENSE',stage/'licenses/piMorpH-GPL-3.0.txt');shutil.copy2(B/'THIRD-PARTY.md',stage/'licenses/THIRD-PARTY.md')
 for src,dst in [('third_party/mpc-wrapper/LICENSE','wrapper-MIT.txt'),('third_party/PolyWerk/LICENSE','PolyWerk-MIT.txt'),('third_party/MS20XXL/LICENSE','MS20XXL-GPL.txt'),('third_party/overcast/LICENSE','Overcast-MIT.txt'),('reference/fonts/OFL.txt','Titillium-OFL.txt')]:shutil.copy2(B/src,stage/'licenses'/dst)
 shutil.copy2(B/'presets/programs.json',stage/'factory-programmes.json')
+def plugin_json(arch_key,version):
+ # Official MPC plugin-folder declaration (SDK docs/plugin-folder-format.md); one architecture key per package.
+ return json.dumps(dict(name='πMorpH',manufacturer='Timo',version=version,format='vst2',kind='instrument',uid='PiMH',category='Synth',numInputs=0,numOutputs=2,**{arch_key:'pimorph.so'},description='Polyphonic XY wavetable synthesizer with paths, orbit, HP/LP filters, dual LFOs, modulation matrix, 100 factory sounds and Custom Wavetable import.',author='Timo',url='https://github.com/timomacquis/piMorpH-MPC',license='GPL-3.0-or-later'),ensure_ascii=False,indent=2)+'\n'
+(stage/'plugin.json').write_text(plugin_json('file32',RELEASE_VERSION),encoding='utf-8')
 (stage/'PROVENANCE.json').write_text(json.dumps(dict(version=VERSION,architecture='armv7',engine_sha256=sha(B/'build/pimorph.so'),factory_programmes=101,tables=100,source_repo='timomacquis/piMorpH-MPC',build_inputs=built['inputs'],hardware_qualified=False,device_smoke_validated=bool(promotion.get('device_smoke_validated')),runtime_identical_to=promotion.get('candidate')),indent=2)+'\n')
 if promotion:
  for n,h in promotion['runtime_sha256'].items():assert sha(B/'build/pimorph.so' if n=='pimorph.so' else stage/n)==h,'Validated runtime changed: '+n

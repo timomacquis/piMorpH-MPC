@@ -14,16 +14,16 @@ Each voice moves through a wavetable space using a path and an elliptical orbit.
 - Editable paths with 2–12 points; fixed, one-shot, loop and ping-pong playback.
 - Tempo-synced path/orbit timing and dual LFOs with eleven shapes.
 - Native touch controls, contextual Q-Links and compact selection panels.
-- Cached graphical previews, with background updates held during editing.
+- Light graphical previews: live XY cross and coloured path points, a smooth filter curve.
 - **100 original multi-frame wavetable sounds + INIT**, in the native PRESET menu.
 - **Custom Wavetable**: import your own WAV tables from the device drives.
 - Native preset/project state, including musical parameters and the selected table or external file path.
 
 ## Download
 
-[πMorpH 0.1.2 — Force Gen1 / ARMv7](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.1.2)
+[πMorpH 0.1.3 — Force Gen1 / ARMv7](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.1.3)
 
-Package: **piMorpH-0.1.2-mpc-armv7.zip**. Use the included standard installer after saving your project. No Gen2 package is provided.
+Package: **piMorpH-0.1.3-mpc-armv7.zip**. Use the included standard installer after saving your project. A Gen2 ARM64 package (**piMorpH-0.1.3-mpc-aarch64.zip**) is provided untested; see [Gen2](docs/INSTALLATION-GEN2.md).
 
 [Français](docs/MODE-EMPLOI.md) · [English](docs/USER-MANUAL.md) · [Build](docs/BUILD.md) · [Validation](docs/VALIDATION.md).
 
@@ -50,13 +50,8 @@ The factory bank remains **100 sounds + INIT**, with Velvet Field first. Keep th
 
 ## Status
 
-Force Gen1 / ARM32. The installed 0.1.2 candidate was validated on the device; this release retains its exact engine, skin and factory bank. PC tests cover accepted import formats, two-tap selection, saved VST state, failure fallback, native programs and graphics notification limits. This does not claim exhaustive device qualification or Gen2 compatibility.
+Force Gen1 / ARM32. 0.1.3 lightens the SPACE, MOTION and FILTER displays; the sound engine and factory bank are unchanged from 0.1.2. The candidate build was installed and used on the device. PC tests cover accepted import formats, two-tap selection, saved VST state, failure fallback, native programs and graphics notification limits. This does not claim exhaustive device qualification or Gen2 compatibility.
 
 ## Sources and licensing
 
 GPL-3.0-or-later for the instrument. Original factory wavetables included with redistribution permission. Full credits and component licenses: [THIRD-PARTY.md](THIRD-PARTY.md). No ROM or commercial instrument factory-bank extractions are included.
-
-
-## Gen2 ARM64
-
-[Download ARM64](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.1.2/piMorpH-0.1.2-mpc-aarch64.zip) · [Gen2 guide and limitations](docs/INSTALLATION-GEN2.md). **Not tested on Gen2 hardware.** PC validation passes; Force Gen1 remains unchanged.

@@ -51,6 +51,10 @@ def walk(x):
  elif isinstance(x,list):
   for v in x:walk(v)
 walk(j);tui.write_text(json.dumps(j,indent=2)+'\n')
+def plugin_json(arch_key,version):
+ # Official MPC plugin-folder declaration (SDK docs/plugin-folder-format.md); one architecture key per package.
+ return json.dumps(dict(name='πMorpH',manufacturer='Timo',version=version,format='vst2',kind='instrument',uid='PiMH',category='Synth',numInputs=0,numOutputs=2,**{arch_key:'pimorph.so'},description='Polyphonic XY wavetable synthesizer with paths, orbit, HP/LP filters, dual LFOs, modulation matrix, 100 factory sounds and Custom Wavetable import.',author='Timo',url='https://github.com/timomacquis/piMorpH-MPC',license='GPL-3.0-or-later'),ensure_ascii=False,indent=2)+'\n'
+(stage/'plugin.json').write_text(plugin_json('file64',VERSION),encoding='utf-8')
 notes='Gen2 ARM64 build of πMorpH '+VERSION+'. Compiled and package-checked on PC; NOT TESTED ON GEN2 HARDWARE. 100 factory sounds + INIT. Small Image assets padded for Gen2 rendering. Gen1 package unchanged. Please report device model, OS and results for sound, presets, Q-Links, samples and effects.\n'
 (stage/'GEN2-STATUS.md').write_text(notes)
 (stage/'PROVENANCE.json').write_text(json.dumps(dict(version=VERSION,architecture='aarch64',hardware_verified=False,gen1_package_sha256=original,engine_sha256=sha(so),source_hashes=source_hashes,small_images_padded=sum(k!=v for k,v in grown.items())),indent=2)+'\n')
