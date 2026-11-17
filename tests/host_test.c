@@ -7,7 +7,9 @@ static float last_mode;
 static int chart_events;
 static int fast_events;static int test_frames,last_heavy_frame=-100000,heavy_events;
 static VstTimeInfo ti={.tempo=120,.flags=kVstTempoValid};
-static intptr_t host(AEffect*a,int32_t op,int32_t i,intptr_t v,void*p,float f){(void)a;(void)i;(void)v;(void)p;(void)f;if(op==42)updates++;if(op==audioMasterAutomate){notifications++;if(PICN_PLOT_VALUE[i]){assert(last_mode==1);chart_events++;}
+static int live_events=0;
+static intptr_t host(AEffect*a,int32_t op,int32_t i,intptr_t v,void*p,float f){(void)a;(void)i;(void)v;(void)p;(void)f;if(op==42)updates++;if(op==audioMasterAutomate&&!strncmp(PARAMS[i].key,"lfo",3)&&(strstr(PARAMS[i].key,"_live")||strstr(PARAMS[i].key,"_pos"))){live_events++;return 0;}/* 0.2.0 c3 : trace LFO en direct, voulue ; comptée à part */
+if(op==audioMasterAutomate){notifications++;if(PICN_PLOT_VALUE[i]){assert(last_mode==1);chart_events++;}
 #ifdef PICN_GRAPHICS_REPORT_FRAMES
 if(i>=PICN_FAST_FIRST&&i<PICN_FAST_FIRST+PICN_FAST_COUNT)fast_events++;/* PERF-CANDIDATE.4: own budget */
 else if(PICN_VISUAL_CLASS[i]==1){assert(test_frames-last_heavy_frame>=PICN_GRAPHICS_REPORT_FRAMES);last_heavy_frame=test_frames;heavy_events++;}
@@ -48,6 +50,7 @@ int main(){AEffect*a=VSTPluginMain(host),*b=VSTPluginMain(host);assert(a&&b&&a->
  assert(mode_events==0&&max_callbacks==0&&updates==0);
  for(int i=0;i<2400;i++){notifications=0;block(a,out);assert(notifications<=2);usleep(1000);}
  assert(last_mode==0&&mode_events>=2&&chart_events>0);
+ printf("LFO live trace notifications: %d\n",live_events);
  printf("SPACE reveal stress: hidden during chart callbacks; reveal after all chart values delivered; transitions=%d\n",mode_events);
  printf("SPACE hold stress: during-drag callbacks=%d mode-events=%d update-display=%d; precise recovery budget<=2\n",total_callbacks,mode_events,updates);
  a->dispatcher(a,effClose,0,0,0,0);b->dispatcher(b,effClose,0,0,0,0);puts("PASS: actual wrapper; 101 unique native programmes; tapered value mapping; sample-accurate MIDI; edited chunk roundtrip/programme identity; no full UI rebuild during parameter edits; two instances");}

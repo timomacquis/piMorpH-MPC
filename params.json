@@ -33073,5 +33073,397 @@
     "max": 1,
     "default": 0,
     "poll": false
+  },
+  {
+    "key": "arp_mode",
+    "name": "ARP",
+    "min": 0,
+    "max": 19,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "OFF",
+      "UP",
+      "DOWN",
+      "UP/DOWN",
+      "DOWN/UP",
+      "UP+DOWN",
+      "DOWN+UP",
+      "THUMB UP",
+      "THUMB UD",
+      "PINKY UP",
+      "PINKY UD",
+      "CONVERGE",
+      "DIVERGE",
+      "CON+DIVERGE",
+      "PLAYED",
+      "CHORD",
+      "RANDOM",
+      "RAND NO DUP",
+      "RAND DRIFT",
+      "RAND ONCE"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_rate",
+    "name": "ARP RATE",
+    "min": 0,
+    "max": 18,
+    "default": 12,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "bar",
+      "3/4",
+      "bar t",
+      "1/2",
+      "3/8",
+      "1/3",
+      "1/4",
+      "3/16",
+      "1/6",
+      "1/8",
+      "3/32",
+      "1/12",
+      "1/16",
+      "3/64",
+      "1/24",
+      "1/32",
+      "3/128",
+      "1/48",
+      "1/64"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_octaves",
+    "name": "ARP OCTAVES",
+    "min": 0,
+    "max": 3,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_gate",
+    "name": "ARP GATE",
+    "min": 0,
+    "max": 100,
+    "default": 50,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "arp_chance",
+    "name": "ARP CHANCE",
+    "min": 0,
+    "max": 100,
+    "default": 100,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "arp_offset",
+    "name": "ARP OFFSET",
+    "min": 0,
+    "max": 16,
+    "default": 8,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "-8",
+      "-7",
+      "-6",
+      "-5",
+      "-4",
+      "-3",
+      "-2",
+      "-1",
+      "0",
+      "+1",
+      "+2",
+      "+3",
+      "+4",
+      "+5",
+      "+6",
+      "+7",
+      "+8"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_repeats",
+    "name": "ARP REPEATS",
+    "min": 0,
+    "max": 16,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "INF",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_retrig",
+    "name": "ARP RETRIG",
+    "min": 0,
+    "max": 6,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "OFF",
+      "NOTE",
+      "1/4",
+      "1/2",
+      "BAR",
+      "2 BARS",
+      "4 BARS"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_latch",
+    "name": "ARP LATCH",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "OFF",
+      "ON"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "arp_mode__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_mode"
+  },
+  {
+    "key": "arp_rate__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_rate"
+  },
+  {
+    "key": "arp_octaves__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_octaves"
+  },
+  {
+    "key": "arp_offset__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_offset"
+  },
+  {
+    "key": "arp_repeats__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_repeats"
+  },
+  {
+    "key": "arp_retrig__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_retrig"
+  },
+  {
+    "key": "arp_latch__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "arp_latch"
+  },
+  {
+    "key": "lfo1_live",
+    "name": "LFO 1 LIVE",
+    "min": 0,
+    "max": 1,
+    "default": 0.5,
+    "poll": false
+  },
+  {
+    "key": "lfo2_live",
+    "name": "LFO 2 LIVE",
+    "min": 0,
+    "max": 1,
+    "default": 0.5,
+    "poll": false
+  },
+  {
+    "key": "lfo1_pos",
+    "name": "LFO 1 POSITION",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "lfo2_pos",
+    "name": "LFO 2 POSITION",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "poll": false
+  },
+  {
+    "key": "dub_time",
+    "name": "DELAY TIME",
+    "min": 10,
+    "max": 2000,
+    "default": 1000,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "dub_sync",
+    "name": "DELAY SYNC",
+    "min": 0,
+    "max": 1,
+    "default": 1,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "FREE",
+      "SYNC"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "dub_feedback",
+    "name": "DELAY FEEDBACK",
+    "min": 0,
+    "max": 120,
+    "default": 45,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "dub_filter",
+    "name": "DELAY FILTER",
+    "min": -100,
+    "max": 100,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "dub_level",
+    "name": "DELAY LEVEL",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "tv_type",
+    "name": "REVERB TYPE",
+    "min": 0,
+    "max": 9,
+    "default": 1,
+    "dynamic_display": true,
+    "poll": false,
+    "options": [
+      "ROOM",
+      "HALL",
+      "SPRING",
+      "PLATE",
+      "MODULATED",
+      "REVERSE",
+      "HALO",
+      "HALO+",
+      "ABYSS",
+      "CASCADE"
+    ],
+    "display": "int"
+  },
+  {
+    "key": "tv_decay",
+    "name": "REVERB DECAY",
+    "min": 0,
+    "max": 100,
+    "default": 55,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "tv_live",
+    "name": "REVERB LIVELINESS",
+    "min": 0,
+    "max": 100,
+    "default": 60,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "tv_warmth",
+    "name": "REVERB WARMTH",
+    "min": 0,
+    "max": 100,
+    "default": 35,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "tv_level",
+    "name": "REVERB LEVEL",
+    "min": 0,
+    "max": 100,
+    "default": 0,
+    "dynamic_display": true,
+    "poll": false
+  },
+  {
+    "key": "tv_type__open",
+    "name": "Options",
+    "min": 0,
+    "max": 1,
+    "default": 0,
+    "popup_of": "tv_type"
   }
 ]

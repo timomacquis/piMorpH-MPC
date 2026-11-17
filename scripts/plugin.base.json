@@ -1,0 +1,14 @@
+{
+  "name": "πMorpH",
+  "manufacturer": "Timo",
+  "version": "0",
+  "format": "vst2",
+  "kind": "instrument",
+  "uid": "PiMH",
+  "category": "Synth",
+  "numInputs": 0,
+  "numOutputs": 2,
+  "file32": "pimorph.so",
+  "license": "GPL-3.0-or-later",
+  "url": "https://github.com/timomacquis/piMorpH-MPC"
+}

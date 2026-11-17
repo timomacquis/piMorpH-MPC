@@ -1,7 +1,7 @@
 from pathlib import Path
 import math
 B=Path(__file__).resolve().parents[1]
-VERSION='0.1.3'
+VERSION='0.2.0'
 FOLDER='Timo - VST - πMorpH'
 PAGES=['SPACE','MOTION','ENVELOPES','FILTER','LFO','MOD']
 WAVES=['SINE','TRIANGLE','RAMP UP','RAMP DOWN','SQUARE','SAMPLE & HOLD','RANDOM SMOOTH','FREE CURVE','RANDOM WALK','RANDOM LOOP','BOUNCE']
@@ -32,3 +32,31 @@ add('point_count','PATH POINTS',2,12,7);add('point_select','SELECT POINT',0,11,0
 for i in range(8):
  add(f'mod{i}_source',f'SLOT {i+1} SOURCE',0,len(SOURCES)-1,0,SOURCES);add(f'mod{i}_dest',f'SLOT {i+1} DEST',0,len(DEST)-1,0,DEST);add(f'mod{i}_amount',f'SLOT {i+1} AMOUNT',-100,100,0)
 add('slot_select','MOD SLOT',0,7,0,[str(i+1) for i in range(8)])
+
+# 0.2.0 : arpégiateur. Paramètres musicaux (sauvegardés) ajoutés en FIN de liste pour ne déplacer aucun index.
+ARP_MODES=['OFF','UP','DOWN','UP/DOWN','DOWN/UP','UP+DOWN','DOWN+UP','THUMB UP','THUMB UD','PINKY UP','PINKY UD','CONVERGE','DIVERGE','CON+DIVERGE','PLAYED','CHORD','RANDOM','RAND NO DUP','RAND DRIFT','RAND ONCE']
+ARP_RATES=['bar','3/4','bar t','1/2','3/8','1/3','1/4','3/16','1/6','1/8','3/32','1/12','1/16','3/64','1/24','1/32','3/128','1/48','1/64']
+ARP_FIELDS=[dict(key='arp_mode',name='ARP',min=0,max=19,default=0,options=ARP_MODES,unit=''),
+ dict(key='arp_rate',name='ARP RATE',min=0,max=18,default=12,options=ARP_RATES,unit=''),
+ dict(key='arp_octaves',name='ARP OCTAVES',min=0,max=3,default=0,options=['1','2','3','4'],unit=''),
+ dict(key='arp_gate',name='ARP GATE',min=0,max=100,default=50,options=None,unit='%'),
+ dict(key='arp_chance',name='ARP CHANCE',min=0,max=100,default=100,options=None,unit='%'),
+ dict(key='arp_offset',name='ARP OFFSET',min=0,max=16,default=8,options=[str(i) if i<=0 else '+'+str(i) for i in range(-8,9)],unit=''),
+ dict(key='arp_repeats',name='ARP REPEATS',min=0,max=16,default=0,options=['INF']+[str(i) for i in range(1,17)],unit=''),
+ dict(key='arp_retrig',name='ARP RETRIG',min=0,max=6,default=0,options=['OFF','NOTE','1/4','1/2','BAR','2 BARS','4 BARS'],unit=''),
+ dict(key='arp_latch',name='ARP LATCH',min=0,max=1,default=0,options=['OFF','ON'],unit='')]
+
+# 0.2.0 (candidat 3) : effets REVERB + DELAY retirés (décision de Greg du 17/11/2026) ; jamais publiés.
+# 0.2.0 (candidat 6) : DELAY (Dub Station, MIT) puis REVERB (Tidal Verb, MIT), en série sur la sortie.
+# 11 paramètres en fin de liste (4085 -> 4096). LEVEL 0 = effet coupé, réglage par défaut : anciens projets inchangés.
+TV_TYPES=['ROOM','HALL','SPRING','PLATE','MODULATED','REVERSE','HALO','HALO+','ABYSS','CASCADE']
+FX_FIELDS=[dict(key='dub_time',name='DELAY TIME',min=10,max=2000,default=1000,options=None,unit='ms'),
+ dict(key='dub_sync',name='DELAY SYNC',min=0,max=1,default=1,options=['FREE','SYNC'],unit=''),
+ dict(key='dub_feedback',name='DELAY FEEDBACK',min=0,max=120,default=45,options=None,unit='%'),
+ dict(key='dub_filter',name='DELAY FILTER',min=-100,max=100,default=0,options=None,unit=''),
+ dict(key='dub_level',name='DELAY LEVEL',min=0,max=100,default=0,options=None,unit='%'),
+ dict(key='tv_type',name='REVERB TYPE',min=0,max=9,default=1,options=TV_TYPES,unit=''),
+ dict(key='tv_decay',name='REVERB DECAY',min=0,max=100,default=55,options=None,unit='%'),
+ dict(key='tv_live',name='REVERB LIVELINESS',min=0,max=100,default=60,options=None,unit='%'),
+ dict(key='tv_warmth',name='REVERB WARMTH',min=0,max=100,default=35,options=None,unit='%'),
+ dict(key='tv_level',name='REVERB LEVEL',min=0,max=100,default=0,options=None,unit='%')]

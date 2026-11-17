@@ -6,9 +6,9 @@ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 promotion_path=B/'Validation/RELEASE-PROMOTION.json'
 promotion=json.loads(promotion_path.read_text()) if promotion_path.exists() else {}
 RELEASE_VERSION=VERSION.split('-')[0]
-assert RELEASE_VERSION=='0.1.3'
+assert RELEASE_VERSION=='0.2.0'
 assert Path(B/'Validation/IMPORT-TEST.json').exists()
-for name in ['NATIVE-TEST.txt','HOST-TEST.txt']:assert 'PASS:' in (B/'Validation'/name).read_text()
+for name in ['NATIVE-TEST.txt','HOST-TEST.txt','ARP-TEST.txt','ARP-ENGINE-TEST.txt','FX-ENGINE-TEST.txt']:assert 'PASS:' in (B/'Validation'/name).read_text()
 audio=json.loads((B/'Validation/Factory-Sounds/AUDIO-CHECK.json').read_text());assert len(audio['results'])==101 and all(r['clipped_samples']==0 and r['peak']>12 for r in audio['results'])
 built=json.loads((B/'build/build-receipt.json').read_text())
 for name,h in built['inputs'].items():assert sha(B/name)==h,'Stale input: '+name

@@ -15,3 +15,12 @@ run(['./build/native-test'],'NATIVE-TEST.txt')
 run(['gcc','-std=c11',*flags,'-c','tests/host_test.c','-o','build/host-test.o'])
 run(['g++','-std=c++17','-pthread',*flags,'build/host-test.o',*sources,'-ldl','-lm','-o','build/host-test'])
 run(['./build/host-test'],'HOST-TEST.txt')
+# 0.2.0 : arpégiateur (logique seule, puis dans le moteur).
+run(['g++','-std=c++17',*flags,'-Isrc','tests/arp_test.cpp','-o','build/arp-test'])
+run(['./build/arp-test'],'ARP-TEST.txt')
+run(['g++','-std=c++17','-pthread',*flags,'tests/arp_engine_test.cpp',*sources,'-o','build/arp-engine-test'])
+run(['./build/arp-engine-test'],'ARP-ENGINE-TEST.txt')
+# 0.2.0 (candidat 6) : DELAY Dub Station + REVERB Tidal Verb.
+run(['g++','-std=c++17','-pthread',*flags,'tests/fx_engine_test.cpp',*sources,'-o','build/fx-engine-test'])
+run(['./build/fx-engine-test'],'FX-ENGINE-TEST.txt')
+# 0.2.0 (candidat 2) : effets REVERB + DELAY repris de πToniC.

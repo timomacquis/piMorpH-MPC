@@ -9,14 +9,14 @@ assert len(P)<=4096
 assert len(I)==len(P) and list(I)==(B/'params.lock').read_text().splitlines()
 a=B/'build/skin'/FOLDER/'Plugin Skins';j=json.loads((a/'TUI.json').read_text())['pageData'];defs={r['key']:r['value'] for r in j['componentDefinitions']['localComponentDefinitions']}
 assert len(defs)==len(j['componentDefinitions']['localComponentDefinitions'])
-assert [r['tabName'] for r in j['tabs'][:6]]==PAGES
+assert [r['tabName'] for r in j['tabs'][:6]]==PAGES and [r['tabName'] for r in j['tabs'][-2:]]==['ARP','FX'] and j['tabs'][-2]['fnKeyIndex']==6 and j['tabs'][-1]['fnKeyIndex']==7
 for definition in defs.values():
  for c in definition['componentsData']:
   rect=list(map(float,c['bounds']['bounds'].split()));assert len(rect)==4 and all(math.isfinite(n) for n in rect) and rect[2]>0 and rect[3]>0
   for remap in c['handle remapping']['map']:
    assert remap['value'].startswith('Parameter ');assert 0<=int(remap['value'].split()[-1])<len(P)
   d=c['componentData'];kind=d['type'];v=d['data']
-  assert kind in defs or kind in ['Image','Label','Knob','Button','Slider','Envelope','Path','Plotter','XYPad']
+  assert kind in defs or kind in ['Image','Label','Knob','Button','Slider','Envelope','Path','Plotter','Meter','XYPad']
   if kind=='Image':assert (a/v['image']).is_file()
   if kind=='Knob':
    image=Image.open(a/v['filmStrip'])
@@ -31,7 +31,7 @@ for definition in defs.values():
     assert image.height%(v['numFrames']+1)==0 and image.height<=16384 # Legacy artwork, separate count audit pending.
 
 for f in ['Q-Links.json','Q-Links - 4by4.json','Q-Links - 8by1.json']:
- rows=json.loads((a/f).read_text())['Screen Mode Q-Links']['map'];assert len(rows)==8
+ rows=json.loads((a/f).read_text())['Screen Mode Q-Links']['map'];assert len(rows)==10  # 0.2.0 c6 : onglet FX (Dub Station + Tidal Verb)
  for r in rows:
   values=r['Q-Links'];assert set(values)=={f'Q-Link {i}' for i in range(1,17)}
   assert all(-1<=v<len(P) for v in values.values())
@@ -39,4 +39,4 @@ for f in ['Q-Links.json','Q-Links - 4by4.json','Q-Links - 8by1.json']:
  # Main SPACE controls exactly follow the proven Force physical ordering.
  first=rows[0]['Q-Links'];assert [first[f'Q-Link {i}'] for i in [13,9,5,1,14,10,6,2]]==[I[k] for k in ['x','y','transpose','glide','voice_limit','level','pan','bend_range']]
 assert not any('WAVETABLE BANK' in str(d) for d in defs.values())
-print(f'PASS: {len(P)} stable parameters, six pages/two LFO subpages, all references/assets, Force Q-Link order, atlas dimensions checked (large LFO1 atlas is an explicit unvalidated device probe), no WAVETABLE BANK')
+print(f'PASS: {len(P)} stable parameters, six pages/two LFO subpages/ARP + FX pages, all references/assets, Force Q-Link order, atlas dimensions checked (large LFO1 atlas is an explicit unvalidated device probe), no WAVETABLE BANK')

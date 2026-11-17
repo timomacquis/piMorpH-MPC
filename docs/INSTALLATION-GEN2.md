@@ -1,13 +1,13 @@
-# πMorpH 0.1.3 — Gen2 ARM64
+# Gen2 ARM64 — πMorpH 0.2.0
 
-**Compiled and checked on PC; not tested on Gen2 hardware.** The Force Gen1 ARM32 package remains unchanged.
+Compiled for 64-bit Gen2 MPC devices (`uname -m` prints `aarch64`). **Not tested on Gen2 hardware.**
 
-Same synthesis/import sources, parameter indices, 100 factory tables and 100 sounds + INIT. The small Image padding previously used for πClideaN is applied for Gen2 rendering. No device compatibility, CPU figure or installation/uninstallation validation is claimed.
+Install exactly as on Gen1 (see [Installation and removal](INSTALLATION.md)): unzip `piMorpH-0.2.0-vst2-aarch64.zip` and copy the folder **`Timo - VST - πMorpH`** into `VST2 Plugins` at the root of a drive, then restart MPC. On an MPC Live III the internal drive is `/nvme/VST2 Plugins`. Its `plugin.json` declares the 64-bit binary (`file64`).
 
-Download `piMorpH-0.1.3-mpc-aarch64.zip` from release v0.1.3; follow its included Gen2 installation guide. Keep external custom WAV files at their saved paths. Please report device model/OS, audio, native presets, Q-Links, Custom Wavetable import and the SPACE/MOTION, filter, envelope and LFO graphics.
+## Gen2 skin note
 
-PC tests passed: sanitized native engine and actual wrapper; 101 factory programs, MIDI/state/instance isolation, bounded graphics notifications; PCM16/PCM32/float32 import, browser, state restore and malformed/missing-file fallback. ELF64 AArch64 and imported GLIBC versions are checked (maximum 2.34). The portable catalogue package and payload hashes pass. Six pre-existing tall-filmstrip warnings remain; Gen2 rendering is not verified.
+MPC Live III draws a non-button `Image` component as a blank box when its bitmap is smaller than about 5400 pixels in area. The Gen2 package therefore ships a skin whose small images are padded to at least 6400 pixels. The Gen1 skin is unchanged.
 
-## Rebuild
+Same engine sources, fixed parameter indices and 101 built-in programs as Gen1. Rebuild: `scripts/build_aarch64.py` with `PIMORPH_AARCH64_SYSROOT`.
 
-Prepare the normal Gen1 build and receipt first, retaining the public ARMv7 ZIP in `dist/`. Use GCC/G++ 12 AArch64 in `PIMORPH_AARCH64_SYSROOT`, Python with Pillow, then run `scripts/prepare_gen2_compat.py` and `scripts/build_aarch64.py`. `PIMORPH_AARCH64_COMPAT` chooses the extracted GCC10/glibc2.31 compatibility runtime; pinned downloads and hashes are in `reference/GEN2-TOOLCHAIN.json`. C++ and libgcc are linked statically. No system package is changed and no device is contacted.
+Please report device model, OS version and results.

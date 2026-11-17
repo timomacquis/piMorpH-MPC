@@ -6,7 +6,7 @@ Pick a sound. Play a note. Let its timbre travel.
 
 **πMorpH is a polyphonic wavetable synthesizer.** Each voice explores an XY space, follows a path and an orbit, then passes through two filters. Envelopes and LFOs bring it to life.
 
-This guide describes the **0.1.2, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**.
+This guide describes the **0.2.0, Force Gen1 / ARM32** release with **100 shaped sounds + INIT**, the arpeggiator and the delay/reverb page.
 
 ## 1. Your first journey
 
@@ -172,7 +172,7 @@ Choose a shape:
 
 **NOTE** restarts its phase on each newly triggered note; overlapping LEGATO notes do not retrigger it. The LFOs are shared by the voices.
 
-The preview shows **4 cycles** for regular shapes and **8 cycles** for random shapes. It illustrates the signal rather than an animated playback position.
+The preview shows **4 cycles** for regular shapes and **8 cycles** for random shapes. A gold (LFO 1) or violet (LFO 2) dot moves along the curve, following the LFO as it plays; it is hidden while the LFO is OFF. For random shapes the curve is a preview, so the dot may leave it. The same dot appears on the SHAPE subpages.
 
 The **LFO 1 SHAPE / LFO 2 SHAPE** subpages, available through LFO navigation, provide shape-specific settings and the eight FREE CURVE points: square width, RANDOM WALK step size, RANDOM LOOP length/evolution, and BOUNCE gravity/restitution.
 
@@ -200,7 +200,39 @@ Try:
 
 Rows targeting the same destination add together. AMOUNT is a modulation depth, not a direct value in Hz or semitones.
 
-## 8. Keep your discoveries
+## 8. ARP — Arpeggiate
+
+The **ARP** page plays held notes as a tempo-locked pattern. Each arpeggiated note is a normal πMorpH note, with its envelopes, path and modulation.
+
+- **ARP**: OFF or one of 20 modes (UP, DOWN, UP/DOWN, DOWN/UP, UP+DOWN, DOWN+UP, THUMB, PINKY, CONVERGE, DIVERGE, PLAYED, CHORD, RANDOM…). Amber once it leaves OFF.
+- **RATE**: from a bar to 1/64, triplets and dotted values included, following the Force tempo. While the transport plays, the pattern starts on the RATE grid.
+- **REPEATS**: INF or 1–16 cycles. **RETRIG**: OFF, on each NOTE, or every 1/4, 1/2, BAR, 2 or 4 BARS.
+- **LATCH** keeps the pattern after release (the sustain pedal does too); a new chord replaces the old one.
+- Q-Links 1–4: **OCTAVES** (1–4), **GATE**, **CHANCE**, **OFFSET** (start step, −8 to +8).
+
+Projects and presets from 0.1.x load with ARP OFF and sound as before.
+
+## 9. FX — Delay and reverb
+
+![FX on Force](images/fx-force.png)
+
+Two effects in series on πMorpH's output: **DELAY**, then **REVERB** (the reverb also receives the echoes). **LEVEL 0 switches an effect off**; both are off by default, so older projects sound unchanged.
+
+**DELAY** — a tape delay from *Dub Station*:
+
+- **SYNC / FREE**: in SYNC, **TIME** chooses a division (1/16, 1/8, 1/8., 1/4, 1/4., 1/2, 1 bar) on the Force tempo; in FREE, 10 ms to 2 s. Turning TIME during an echo glides like tape.
+- **FEEDBACK** up to 120 %: past 100 % the echoes self-oscillate, held at a safe level.
+- **FILTER** in the feedback loop: low-pass to the left, high-pass to the right, OFF at the centre.
+- **LEVEL**: the echoes' level. The dry sound is never coloured.
+
+**REVERB** — *Tidal Verb*:
+
+- **TYPE**: ROOM, HALL, SPRING, PLATE, MODULATED, REVERSE, HALO, HALO+ (octave shimmer), ABYSS (slow drifting pitch), CASCADE (stacked octaves).
+- **DECAY** (tail length), **LIVELINESS** (dark to bright), **WARMTH** (low-end body), **LEVEL** (wet/dry).
+
+Q-Links 1–4: TIME, FEEDBACK, FILTER, LEVEL of the delay; 5–8: DECAY, LIVELINESS, WARMTH, LEVEL of the reverb.
+
+## 10. Keep your discoveries
 
 The **PRESET** menu contains **100 shaped sounds + INIT**, built from the 100 supplied tables. Velvet Field is preset 1, using the settings saved on the Force. Each sound has its own settings.
 

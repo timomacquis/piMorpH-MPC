@@ -1,5 +1,10 @@
 // Native MPC adapter; host work is serialized by the pinned wrapper.
 #include "synth.h"
+#include "arp.h"
+#include "fx_chain.h"  // 0.2.0 (candidat 6) : DELAY Dub Station + REVERB Tidal Verb
+#include <cmath>
+#include <cstring>
+#include <cstdint>
 #include "import_browser.h"
 #include "import_wavetable.h"
 #include "lfo_preview.h"
@@ -44,14 +49,14 @@ struct Snapshot{Values values{};std::string external;unsigned source=1;int bank=
 struct Publication{std::shared_ptr<pf::Wavetable> table;std::string external,message;unsigned source=1;TrajectoryPreview trajectory{};WavePreview waveLine{};std::array<LfoPreview,2> lfoLine{};FilterPreview filterLine{};TrajectoryDraft draftPath{};int bank=0,error=0;unsigned revision=0;bool draft=false;};
 struct ImportCheck{unsigned serial=0;bool valid=false;std::string path,message;};
 struct Instance{
- Synth synth;Values p{};std::bitset<pmmeta::Count> changed;int notifyCursor=0,bank=0;unsigned revision=1,publishedRevision=0;int loaded=-1,error=0;bool stateValid=true,wasPlaying=false;
+ Synth synth;Arp arp;int liveIdx[2]={-1,-1},posIdx[2]={-1,-1};int liveSamples=0;struct ArpOut{Synth&s;void noteOn(int n,double v){s.noteOn(n,v);}void noteOff(int n){s.noteOff(n);}};ArpOut arpOut{synth};double hostPpq=0;long samplesSinceSong=0;bool hostPlaying=false;Values p{};std::bitset<pmmeta::Count> changed;int notifyCursor=0,bank=0;unsigned revision=1,publishedRevision=0;int loaded=-1,error=0;bool stateValid=true,wasPlaying=false;
  std::mutex checkMutex;std::string checkPath,selectedPath;bool selectedValid=false;std::atomic<unsigned> checkSerial{0};std::atomic<bool> checkCancel{false},checkEnabled{false};std::atomic<ImportCheck*> checkReady{nullptr},checkRetired{nullptr};
  ImportBrowser browser;std::string requestedPath,externalPath,importMessage;std::atomic<unsigned> sourceSerial{1};bool importing=false;
  std::string directory;std::thread worker;std::atomic<bool> stop{false},cancel{false};std::atomic<int> desiredBank{0};
  std::mutex jobs;Snapshot snapshot;std::atomic<unsigned> requested{0};std::atomic<Publication*> ready{nullptr},retired{nullptr};Publication* active=nullptr;
  int plotQuietSamples=100000;bool editingPlot=false;
- int submittedSamples=0;double bend=0;float buffer[256]{};
- Instance(const char*dir):directory(dir?dir:"."){selectedPath.reserve(1024);checkPath.reserve(1024);requestedPath.reserve(1024);externalPath.reserve(1024);snapshot.external.reserve(1024);importMessage.reserve(256);indexMap();importIndices();filterIndices();plotIndices();draftIndices();for(int i=0;i<pmmeta::Count;i++)p[i]=pmmeta::params[i].def;worker=std::thread([this]{work();});}
+ int submittedSamples=0;double bend=0;float buffer[256]{};FxChain fx;  // 0.2.0 (candidat 6)
+ Instance(const char*dir):directory(dir?dir:"."){selectedPath.reserve(1024);checkPath.reserve(1024);requestedPath.reserve(1024);externalPath.reserve(1024);snapshot.external.reserve(1024);importMessage.reserve(256);indexMap();importIndices();filterIndices();plotIndices();draftIndices();for(int i=0;i<pmmeta::Count;i++)p[i]=pmmeta::params[i].def;fx.prepare(SR);worker=std::thread([this]{work();});}
  ~Instance(){stop=true;cancel=true;checkCancel=true;if(worker.joinable())worker.join();delete checkReady.exchange(nullptr);delete checkRetired.exchange(nullptr);delete ready.exchange(nullptr);delete retired.exchange(nullptr);delete active;}
  double value(const char*k)const{int i=id(k);return i>=0?p[i]:0;}
  void mark(const char*k){int i=id(k);if(i>=0)changed.set(i);}
@@ -97,6 +102,9 @@ struct Instance{
    double rate=get("rate");q.lfoHz[j]=get("sync")>0?q.bpm/(60*beats[(int)std::lround(rate*6)]):.02*std::pow(1000.,rate);
    for(int k=0;k<4;k++){snprintf(key,sizeof key,"lfo%d_extra%d",j+1,k);l.spec.extra[k]=(int)value(key);}for(int k=0;k<8;k++){snprintf(key,sizeof key,"lfo%d_c%d",j+1,k);l.spec.f[10+k]=(int)value(key);}
   }
+  {auto&d=fx.delay;d.time=(float)value("dub_time");d.sync=value("dub_sync")>.5;d.feedback=(float)value("dub_feedback");d.filter=(float)value("dub_filter");d.level=(float)value("dub_level");d.bpm=(float)q.bpm;
+   fx.rvType=(float)value("tv_type");fx.rvDecay=(float)value("tv_decay");fx.rvLive=(float)value("tv_live");fx.rvWarmth=(float)value("tv_warmth");fx.rvLevel=(float)value("tv_level");fx.apply();}  // 0.2.0 (candidat 6) : effets
+  {auto&a=arp.s;bool was=a.mode>0;a.mode=(int)value("arp_mode");a.rate=(int)value("arp_rate");a.octaves=(int)value("arp_octaves");a.offset=(int)value("arp_offset");a.repeats=(int)value("arp_repeats");a.retrig=(int)value("arp_retrig");a.latch=value("arp_latch")>0;a.gate=value("arp_gate")/100;a.chance=value("arp_chance")/100;arp.bpm=q.bpm;arp.sr=SR;if(was&&a.mode==0){arp.reset(arpOut);synth.panic();}}  // 0.2.0 : arpégiateur
   for(int i=0;i<8;i++){snprintf(key,sizeof key,"mod%d_source",i);q.source[i]=(int)value(key);snprintf(key,sizeof key,"mod%d_dest",i);q.dest[i]=(int)value(key);snprintf(key,sizeof key,"mod%d_amount",i);q.amount[i]=value(key)/100;}
  }
  int alias(int i)const{std::string_view k=pmmeta::params[i].key;char b[48];
@@ -112,17 +120,19 @@ struct Instance{
  }
  bool restore(const char*text){if(strlen(text)>30000)return false;std::istringstream in(text);std::string key,filename,external;bool foundExternal=false;in>>key;if(key!="PMORPH1")return false;Values next{};for(int i=0;i<pmmeta::Count;i++)next[i]=pmmeta::params[i].def;std::bitset<pmmeta::Count> seen;bool foundBank=false,ended=false;int b=-1;
   while(in>>key){if(key=="END"){ended=true;break;}if(key=="bank"){if(foundBank||!(in>>std::quoted(filename)))return false;foundBank=true;for(int j=0;j<Banks;j++)if(filename==bank_names[j])b=j;if(b<0)return false;}else if(key=="external"){if(foundExternal||!(in>>std::quoted(external))||!validExternal(external))return false;foundExternal=true;}else{
-    int i=id(key);double v;if(i<0||i>=pmmeta::Canonical||seen[i]||!(in>>v)||!std::isfinite(v))return false;const auto&m=pmmeta::params[i];if(v<m.low||v>m.high)return false;if(m.options&&v!=std::round(v))return false;seen[i]=true;next[i]=v;}}
+    // 0.2.0 (candidat 3) : les projets enregistrés avec le candidat 2 contiennent les réglages REVERB/DELAY retirés : on les ignore.
+    {static const char*removed[]={"rev_on","rev_size","rev_decay","rev_damp","rev_return","del_on","del_sync","del_div","del_ms","del_feedback","del_tone","del_return"};bool gone=false;for(auto r:removed)if(key==r)gone=true;if(gone){double skip;if(!(in>>skip))return false;continue;}}
+    int i=id(key);double v;if(i<0||!pmmeta::canonical[i]||seen[i]||!(in>>v)||!std::isfinite(v))return false;const auto&m=pmmeta::params[i];if(v<m.low||v>m.high)return false;if(m.options&&v!=std::round(v))return false;seen[i]=true;next[i]=v;}}
   if(!ended||!foundBank||(in>>key))return false;
-  for(int i=0;i<pmmeta::Count;i++){if(PICN_VISUAL_CLASS[i])next[i]=p[i];else if(next[i]!=p[i])changed.set(i);}p=next;aliases();editingPlot=false;plotQuietSamples=100000;synth.panic();apply();setbank(b);if(foundExternal){importFile(external);externalPath=external;}return true;
+  for(int i=0;i<pmmeta::Count;i++){if(PICN_VISUAL_CLASS[i])next[i]=p[i];else if(next[i]!=p[i])changed.set(i);}p=next;aliases();editingPlot=false;plotQuietSamples=100000;arp.reset(arpOut);synth.panic();apply();setbank(b);if(foundExternal){importFile(external);externalPath=external;}return true;
  }
- std::string state()const{std::ostringstream o;o<<"PMORPH1\nbank "<<std::quoted(bank_names[bank])<<'\n'<<std::setprecision(17);for(int i=0;i<pmmeta::Canonical;i++)o<<pmmeta::params[i].key<<' '<<p[i]<<'\n';if(!externalPath.empty())o<<"external "<<std::quoted(externalPath)<<'\n';o<<"END\n";return o.str();}
+ std::string state()const{std::ostringstream o;o<<"PMORPH1\nbank "<<std::quoted(bank_names[bank])<<'\n'<<std::setprecision(17);for(int i=0;i<pmmeta::Count;i++)if(pmmeta::canonical[i])o<<pmmeta::params[i].key<<' '<<p[i]<<'\n';if(!externalPath.empty())o<<"external "<<std::quoted(externalPath)<<'\n';o<<"END\n";return o.str();}
  void set(const char*k,const char*v){if(browserSet(k,v))return;if(!strcmp(k,"ui_plot_finish")){if(p[PlotMode]!=0){p[PlotMode]=0;changed.set(PlotMode);}return;}if(!strcmp(k,"state")){stateValid=restore(v);return;}int i=id(k);if(i<0)return;char*end;double x=strtod(v,&end);if(end==v||*end||!std::isfinite(x))return;
   const auto&m=pmmeta::params[i];x=bound(x,m.low,m.high);if(m.options||!strcmp(k,"point_count")||!strcmp(k,"voice_limit")||!strcmp(k,"transpose"))x=std::round(x);
-  if(!strcmp(k,"panic")){if(x>0)synth.panic();return;}
+  if(!strcmp(k,"panic")){if(x>0){arp.reset(arpOut);synth.panic();}return;}
   if(!strcmp(k,"add_point")||!strcmp(k,"remove_point")){if(x<=0)return;int n=(int)value("point_count");if(k[0]=='a'&&n<12){p[id("point_count")]=n+1;p[id("point_select")]=n;}if(k[0]=='r'&&n>2){p[id("point_count")]=n-1;p[id("point_select")]=std::min(n-2,(int)value("point_select"));}mark("point_count");mark("point_select");aliases();apply();plotEdit();touch();return;}
-  if(i>=pmmeta::Canonical&&strstr(k,"__open")==nullptr&&strcmp(k,"point_x")&&strcmp(k,"point_y")&&strncmp(k,"slot_",5))return;
-  int target=alias(i);if(target>=pmmeta::Canonical)return;if(p[target]==x)return;p[target]=x;if(target!=i)changed.set(target);
+  if(!pmmeta::canonical[i]&&strstr(k,"__open")==nullptr&&strcmp(k,"point_x")&&strcmp(k,"point_y")&&strncmp(k,"slot_",5))return;
+  int target=alias(i);if(!pmmeta::canonical[target])return;if(p[target]==x)return;p[target]=x;if(target!=i)changed.set(target);
   if(!strcmp(k,"play_mode")||!strcmp(k,"voice_limit"))synth.panic();apply();aliasesFor(i,target);if(plotField(k))plotEdit();touch();
  }
  void submit(){if(editingPlot)return;if(publishedRevision==revision)return;if(!jobs.try_lock())return;snapshot.values=p;snapshot.bank=bank;snapshot.external=requestedPath;snapshot.source=sourceSerial.load();snapshot.revision=revision;snapshot.draft=editingPlot;requested=revision;jobs.unlock();publishedRevision=revision;}
@@ -205,10 +215,12 @@ struct Instance{
 void* create(const char*dir){try{return new Instance(dir);}catch(...){return nullptr;}}
 void destroy(void*p){delete static_cast<Instance*>(p);}
 void midi(void*p,const uint8_t*m,int len){auto&e=*static_cast<Instance*>(p);if(len<2)return;int op=m[0]&0xf0;
+ if(e.arp.enabled()&&(op==0x90||op==0x80)&&len>=3){ // 0.2.0 : les notes jouées passent par l'arpégiateur
+  if(op==0x90&&m[2]){e.arp.keyOn(m[1],m[2]/127.,e.arpOut);if(e.hostPlaying)e.arp.align(e.hostPpq+e.samplesSinceSong/SR*e.synth.patch.bpm/60);else e.arp.kick(e.arpOut);}else e.arp.keyOff(m[1],e.arpOut);return;}
  if(op==0x90&&len>=3){if(m[2])e.synth.noteOn(m[1],m[2]/127.);else e.synth.noteOff(m[1]);}
  else if(op==0x80)e.synth.noteOff(m[1]);else if(op==0xe0&&len>=3){e.bend=((m[2]*128+m[1])-8192)/8192.;e.apply();}
  else if(op==0xd0)e.synth.patch.pressure=m[1]/127.;else if(op==0xa0&&len>=3)e.synth.patch.pressure=m[2]/127.;
- else if(op==0xb0&&len>=3){if(m[1]==1)e.synth.patch.modwheel=m[2]/127.;else if(m[1]==64)e.synth.sustain(m[2]>=64);else if(m[1]==120||m[1]==123)e.synth.panic();}}
+ else if(op==0xb0&&len>=3){if(m[1]==1)e.synth.patch.modwheel=m[2]/127.;else if(m[1]==64){if(e.arp.enabled())e.arp.sustain(m[2]>=64,e.arpOut);else e.synth.sustain(m[2]>=64);}else if(m[1]==120||m[1]==123){e.arp.reset(e.arpOut);e.synth.panic();}}}
 void set(void*p,const char*k,const char*v){try{static_cast<Instance*>(p)->set(k,v);}catch(...){static_cast<Instance*>(p)->stateValid=false;}}
 int get(void*p,const char*k,char*b,int n){auto&e=*static_cast<Instance*>(p);if(n<=0)return 0;
  if(!strcmp(k,"table_frames"))return snprintf(b,n,"%d",e.active&&e.active->table?e.active->table->frames:0);
@@ -223,12 +235,25 @@ int get(void*p,const char*k,char*b,int n){auto&e=*static_cast<Instance*>(p);if(n
  int a=e.alias(i);double v=e.p[a];const auto&m=pmmeta::params[a];if(name)return snprintf(b,n,"%s",m.name);
  if(display){if(m.options&&PARAMS[a].nopts)return snprintf(b,n,"%s",PARAMS[a].opts[std::clamp((int)v,0,PARAMS[a].nopts-1)]);
   if(strstr(m.key,"lfo")&&strstr(m.key,"_rate")){int j=m.key[3]-'0';char key[40];snprintf(key,sizeof key,"lfo%d_sync",j);if(e.value(key)>0){static const char*div[]={"1/16","1/8","1/4","1/2","1 BAR","2 BARS","4 BARS"};return snprintf(b,n,"%s",div[(int)std::lround(v*6)]);}return snprintf(b,n,"%.3g Hz",.02*std::pow(1000.,v));}
+  if(!strcmp(m.key,"dub_time")&&e.value("dub_sync")>.5)return snprintf(b,n,"%s",dubfx::kDivLabels[dubfx::divIndexFor((float)v)]);  // 0.2.0 (candidat 6)
+  if((!strncmp(m.key,"dub_",4)||!strncmp(m.key,"tv_",3))&&!strcmp(m.unit,"%"))return snprintf(b,n,"%d %%",(int)std::lround(v));  // valeurs entières (bouton au doigt : 37.01 %)
+  if(!strcmp(m.key,"dub_filter")){if(std::fabs(v)<2)return snprintf(b,n,"OFF");return snprintf(b,n,"%s %d",v<0?"LP":"HP",(int)std::lround(std::fabs(v)));}
   if(!strcmp(m.unit,"ms")&&v>=1000)return snprintf(b,n,"%.2g s",v/1000);return snprintf(b,n,"%.4g%s%s",v,*m.unit?" ":"",m.unit);}
  return snprintf(b,n,"%.12g",v);
 }
 void render(void*p,int16_t*out,int frames){auto&e=*static_cast<Instance*>(p);e.consume();if(e.editingPlot){e.plotQuietSamples+=frames;if(e.plotQuietSamples>=8820){e.editingPlot=false;e.touch();}}e.submittedSamples+=frames;if(e.submittedSamples>=512){e.submit();e.submittedSamples=0;}
- while(frames>0){int count=std::min(128,frames);e.synth.render(e.buffer,count);for(int i=0;i<count*2;i++)out[i]=(int16_t)std::lround(bound(e.buffer[i],-1,1)*32767);out+=count*2;frames-=count;}}
-void song(void*p,double ppq,double bpm,int playing,int){auto&e=*static_cast<Instance*>(p);if(std::isfinite(bpm)&&bpm>=20&&bpm<=400&&bpm!=e.synth.patch.bpm){e.synth.patch.bpm=bpm;e.apply();}
+ e.samplesSinceSong+=frames;
+ while(frames>0){int count=e.arp.until(std::min(128,frames));e.synth.render(e.buffer,count);e.arp.advance(count,e.arpOut);
+  if(e.fx.delay.bpm!=(float)e.synth.patch.bpm){e.fx.delay.bpm=(float)e.synth.patch.bpm;e.fx.delay.update();}e.fx.process(e.buffer,count);  // 0.2.0 (candidat 6) : DELAY puis REVERB
+  // 0.2.0 (candidat 5) : point mobile sur la courbe LFO — valeur (lfoN_live) et position dans la fenêtre affichée (lfoN_pos),
+  // environ 43 fois par seconde (1024 échantillons). Même géométrie que lfoPreview : départ à PHASE, 4 ou 8 cycles.
+  e.liveSamples+=count;if(e.liveSamples>=1024){e.liveSamples=0;for(int j=0;j<2;j++){char k[32];
+   if(e.liveIdx[j]<0){snprintf(k,sizeof k,"lfo%d_live",j+1);e.liveIdx[j]=id(k);snprintf(k,sizeof k,"lfo%d_pos",j+1);e.posIdx[j]=id(k);}
+   const auto&l=e.synth.lfo[j];double cycles=lfoPreviewCycles(l.spec.f[1]);double x=std::fmod(l.phase-e.synth.patch.lfoPhase[j],cycles)/cycles;if(x<0)x+=1;
+   double vals[2]={std::round((e.synth.latestLfo[j]+1)*.5*1000)/1000,std::round(x*576)/576};int idx[2]={e.liveIdx[j],e.posIdx[j]};
+   for(int m=0;m<2;m++){int q=idx[m];if(q<0)continue;if(vals[m]!=e.p[q]){e.p[q]=vals[m];e.changed.set(q);}}}}
+for(int i=0;i<count*2;i++)out[i]=(int16_t)std::lround(bound(e.buffer[i],-1,1)*32767);out+=count*2;frames-=count;}}
+void song(void*p,double ppq,double bpm,int playing,int){auto&e=*static_cast<Instance*>(p);if(std::isfinite(ppq)){e.hostPpq=ppq;e.samplesSinceSong=0;}e.hostPlaying=playing;if(std::isfinite(bpm)&&bpm>=20&&bpm<=400&&bpm!=e.synth.patch.bpm){e.synth.patch.bpm=bpm;e.apply();}
  if(e.wasPlaying&&!playing)e.synth.panic();e.wasPlaying=playing;
  static const double div[]={.25,.5,1,2,4,8,16};if(playing&&std::isfinite(ppq)&&ppq>=0)for(int j=0;j<2;j++){char k[40];snprintf(k,sizeof k,"lfo%d_sync",j+1);if(e.value(k)>0&&!e.synth.patch.lfoReset[j]){snprintf(k,sizeof k,"lfo%d_rate",j+1);e.synth.lfo[j].phase=ppq/div[(int)std::lround(e.value(k)*6)]+e.synth.patch.lfoPhase[j];}}}
 const mpc_engine_t api={create,destroy,midi,set,get,render,nullptr,song};

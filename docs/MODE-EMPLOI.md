@@ -6,7 +6,7 @@ Choisis un son. Joue une note. Fais voyager son timbre.
 
 **πMorpH est un synthétiseur polyphonique à tables d’ondes.** Chaque voix explore un espace XY, suit un trajet et une orbite, puis traverse deux filtres. Enveloppes et LFO donnent vie à l’ensemble.
 
-Ce guide décrit la version **0.1.2, Force Gen1 / ARM32**, avec **100 sons paramétrés + INIT**.
+Ce guide décrit la version **0.2.0, Force Gen1 / ARM32**, avec **100 sons paramétrés + INIT**, l’arpégiateur et la page delay/reverb.
 
 ## 1. Premier voyage
 
@@ -172,7 +172,7 @@ Choisis la forme :
 
 **NOTE** redémarre sa phase à chaque nouvelle note déclenchée ; les notes liées en LEGATO ne le redéclenchent pas. Les LFO sont partagés par les voix.
 
-L’aperçu montre **4 cycles** pour les formes régulières, **8 cycles** pour les formes aléatoires. Il décrit le signal, pas une tête de lecture animée.
+L’aperçu montre **4 cycles** pour les formes régulières, **8 cycles** pour les formes aléatoires. Un point or (LFO 1) ou violet (LFO 2) parcourt la courbe et suit le LFO en train de jouer ; il est caché quand le LFO est sur OFF. Pour les formes aléatoires, la courbe est un aperçu : le point peut s’en écarter. Le même point apparaît sur les sous-pages SHAPE.
 
 Les sous-pages **LFO 1 SHAPE / LFO 2 SHAPE**, accessibles depuis la navigation LFO, donnent les réglages particuliers et les huit points de FREE CURVE : largeur du carré, pas de RANDOM WALK, longueur/évolution de RANDOM LOOP, gravité/rebond de BOUNCE.
 
@@ -200,7 +200,39 @@ Essaie :
 
 Les lignes visant la même destination s’additionnent. AMOUNT est une profondeur de modulation, pas une valeur directe en Hz ou en demi-tons.
 
-## 8. Garder ses découvertes
+## 8. ARP — Arpéger
+
+La page **ARP** joue les notes tenues en motif calé sur le tempo. Chaque note arpégée est une note πMorpH normale, avec ses enveloppes, son trajet et sa modulation.
+
+- **ARP** : OFF ou l’un des 20 modes (UP, DOWN, UP/DOWN, DOWN/UP, UP+DOWN, DOWN+UP, THUMB, PINKY, CONVERGE, DIVERGE, PLAYED, CHORD, RANDOM…). Ambre dès qu’il quitte OFF.
+- **RATE** : de la mesure au 1/64, triolets et pointées compris, sur le tempo de la Force. Quand le transport joue, le motif démarre sur la grille de RATE.
+- **REPEATS** : INF ou 1 à 16 cycles. **RETRIG** : OFF, à chaque NOTE, ou tous les 1/4, 1/2, BAR, 2 ou 4 BARS.
+- **LATCH** garde le motif après relâchement (la pédale de sustain aussi) ; un nouvel accord remplace l’ancien.
+- Q-Links 1 à 4 : **OCTAVES** (1 à 4), **GATE**, **CHANCE**, **OFFSET** (pas de départ, −8 à +8).
+
+Les projets et presets 0.1.x se chargent avec ARP sur OFF et sonnent comme avant.
+
+## 9. FX — Delay et reverb
+
+![FX sur la Force](images/fx-force.png)
+
+Deux effets en série sur la sortie de πMorpH : **DELAY**, puis **REVERB** (la reverb reçoit aussi les échos). **LEVEL à 0 coupe l’effet** ; les deux sont coupés par défaut, les anciens projets sonnent donc à l’identique.
+
+**DELAY** — delay à bande de *Dub Station* :
+
+- **SYNC / FREE** : en SYNC, **TIME** choisit une division (1/16, 1/8, 1/8., 1/4, 1/4., 1/2, 1 mesure) sur le tempo de la Force ; en FREE, de 10 ms à 2 s. Tourner TIME pendant un écho fait glisser le son comme une bande.
+- **FEEDBACK** jusqu’à 120 % : au-delà de 100 %, les échos s’auto-entretiennent, tenus à un niveau sûr.
+- **FILTER** dans la boucle : passe-bas vers la gauche, passe-haut vers la droite, OFF au centre.
+- **LEVEL** : le niveau des échos. Le son direct n’est jamais coloré.
+
+**REVERB** — *Tidal Verb* :
+
+- **TYPE** : ROOM, HALL, SPRING, PLATE, MODULATED, REVERSE, HALO, HALO+ (shimmer à l’octave), ABYSS (hauteur qui dérive lentement), CASCADE (octaves empilées).
+- **DECAY** (longueur de la queue), **LIVELINESS** (de sombre à brillant), **WARMTH** (corps dans le grave), **LEVEL** (dosage).
+
+Q-Links 1 à 4 : TIME, FEEDBACK, FILTER, LEVEL du delay ; 5 à 8 : DECAY, LIVELINESS, WARMTH, LEVEL de la reverb.
+
+## 10. Garder ses découvertes
 
 Le menu **PRESET** contient **100 sons différenciés + INIT**, construits à partir des 100 tables fournies. Velvet Field est le premier preset, avec les réglages sauvegardés sur la Force. Chaque son possède ses propres réglages.
 

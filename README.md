@@ -12,7 +12,9 @@ Each voice moves through a wavetable space using a path and an elliptical orbit.
 
 - Up to eight voices, POLY / MONO / LEGATO and glide.
 - Editable paths with 2–12 points; fixed, one-shot, loop and ping-pong playback.
-- Tempo-synced path/orbit timing and dual LFOs with eleven shapes.
+- Tempo-synced path/orbit timing and dual LFOs with eleven shapes, with a live dot on each LFO curve.
+- **Arpeggiator**: 20 modes, tempo-locked rate, latch, octaves, gate, chance.
+- **FX**: tape delay (*Dub Station*) into reverb (*Tidal Verb*, 10 types), saved with presets and projects.
 - Native touch controls, contextual Q-Links and compact selection panels.
 - Light graphical previews: live XY cross and coloured path points, a smooth filter curve.
 - **100 original multi-frame wavetable sounds + INIT**, in the native PRESET menu.
@@ -21,9 +23,14 @@ Each voice moves through a wavetable space using a path and an elliptical orbit.
 
 ## Download
 
-[πMorpH 0.1.3 — Force Gen1 / ARMv7](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.1.3)
+πMorpH **0.2.0** — [release v0.2.0](https://github.com/timomacquis/piMorpH-MPC/releases/tag/v0.2.0):
 
-Package: **piMorpH-0.1.3-mpc-armv7.zip**. Use the included standard installer after saving your project. A Gen2 ARM64 package (**piMorpH-0.1.3-mpc-aarch64.zip**) is provided untested; see [Gen2](docs/INSTALLATION-GEN2.md).
+| Device generation | Download |
+| --- | --- |
+| **Gen1 / Force** — ARM32 | [piMorpH-0.2.0-vst2-armv7.zip](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.2.0/piMorpH-0.2.0-vst2-armv7.zip) |
+| **Gen2** — ARM64 (not tested on hardware) | [piMorpH-0.2.0-vst2-aarch64.zip](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.2.0/piMorpH-0.2.0-vst2-aarch64.zip) |
+
+Unzip, copy the folder **`Timo - VST - πMorpH`** into **`VST2 Plugins`** at the root of a drive (User Memory: `/sdcard/VST2 Plugins`), then restart MPC. This is the installation method defined by Akai's plugin SDK: no installer script, no `Synths` folder, no MPC.settings entry. Requires MPC OS 3.10.1+ with Enhancements and External Plugin Support enabled. See [Installation and removal](docs/INSTALLATION.md).
 
 [Français](docs/MODE-EMPLOI.md) · [English](docs/USER-MANUAL.md) · [Build](docs/BUILD.md) · [Validation](docs/VALIDATION.md).
 
@@ -50,7 +57,7 @@ The factory bank remains **100 sounds + INIT**, with Velvet Field first. Keep th
 
 ## Status
 
-Force Gen1 / ARM32. 0.1.3 lightens the SPACE, MOTION and FILTER displays; the sound engine and factory bank are unchanged from 0.1.2. The candidate build was installed and used on the device. PC tests cover accepted import formats, two-tap selection, saved VST state, failure fallback, native programs and graphics notification limits. This does not claim exhaustive device qualification or Gen2 compatibility.
+Force Gen1 / ARM32. 0.2.0 adds the arpeggiator, the delay/reverb page and the live LFO dot; 0.1.x projects and presets reopen with the same sound (new features start off). The build was installed and used on the device. PC tests cover the engine, arpeggiator, effects, import, saved state and native programs. This does not claim exhaustive device qualification or Gen2 compatibility.
 
 ## Sources and licensing
 

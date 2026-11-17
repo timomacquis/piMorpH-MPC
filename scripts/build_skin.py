@@ -9,7 +9,7 @@ assert max(I.values())<4096, 'Force native skin handle limit exceeded'
 OUT=B/os.environ.get('PMORPH_SKIN_OUTPUT','build/skin')/FOLDER;A=OUT/'Plugin Skins'
 if OUT.exists():shutil.rmtree(OUT)
 A.mkdir(parents=True,exist_ok=True);defs=[];regular_art=set()
-BG='#171c1f';PANEL='#141d24';FIELD='#242c31';INK='#f1f2ed';EDGE='#42515c';AMBER='#c7aa6d'
+BG='#171c1f';PANEL='#141d24';FIELD='#242c31';INK='#f1f2ed';EDGE='#42515c';AMBER='#c7aa6d';BLUE='#518397';NEUTRAL={'OFF','EMPTY','-','--','NONE','BYPASS'}
 def font(n):return ImageFont.truetype(str(B/'reference/fonts/TitilliumWeb-Regular.ttf'),n)
 def bitmap(name,w,h,caption='',fill=FIELD,ink=INK):
  im=Image.new('RGB',(w,h),BG);d=ImageDraw.Draw(im);d.rounded_rectangle((1,1,w-2,h-2),radius=9,fill=fill,outline=EDGE);d.text((w/2,h/2),caption,font=font(19 if w<140 else 22),fill=ink,anchor='mm');im.save(A/name);return name
@@ -41,7 +41,11 @@ def toggle(key,title,x,y,w,h,extra=None,level1=True):
  serial+=1;parts=[]
  for state in [0,1]:
   fn=f'button_{title.replace("/","-").replace(" ","_")}_{w}_{h}_{state}.png'
-  if not (A/fn).exists():bitmap(fn,w,h,('ON' if state else 'OFF') if key in ['rev_on','del_on','lfo1_on','lfo2_on'] else ('SYNC' if state else 'FREE') if key=='del_sync' else title,'#383122' if state else FIELD,AMBER if state else INK)
+  if key in ('del_sync','dub_sync'):
+   # Charte : SYNC / FREE ont tous deux un sens -> liseré bleu, jamais ambre.
+   fn=f'button_delsync_blue_{w}_{h}_{state}.png'
+   if not (A/fn).exists():bitmap(fn,w,h,'SYNC' if state else 'FREE',FIELD,INK);im=Image.open(A/fn);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,outline='#518397',width=1);im.save(A/fn)
+  elif not (A/fn).exists():bitmap(fn,w,h,('ON' if state else 'OFF') if key in ['rev_on','del_on','lfo1_on','lfo2_on'] else title,'#383122' if state else FIELD,AMBER if state else INK)
   c=art(fn,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(key,state)];parts.append(c)
  name=local('toggle'+str(serial),parts,[action('Toggle Switch'),action('Toggle Switch','Enter Pressed')]);return place(name,key,x,y,w,h,extra)
 def dial(key,title,x,y,w,h,extra=None,slider=False):
@@ -88,16 +92,26 @@ def title(text,x,y,w=540,n=24):
 def readout(key,x,y,w,h,n=22,ink='fff1f2ed',just='horizontallyCentred verticallyCentred'):return place(local('read'+str(len(defs)),[label(0,0,w,h,n=n,ink=ink,just=just)]),key,x,y,w,h)
 MODAL_BUTTON_H=36
 modal_manifest=[]
+SELECTOR_FONT=30  # 0.2.0 (candidat 3) : texte des sélecteurs à la taille des boutons voisins (était 22).
 def picker(key,titletext,x,y,w=286,h=48):
  target_h=52 if key in {'play_mode','path_mode','filter_model'} else LEVEL1_BUTTON_H
  y+=(h-target_h)//2;h=target_h
- flag=key+'__open';parts=[]
- for state in [0,1]:
-  fn=f'picker_{w}_{h}_{state}.png';bitmap(fn,w,h,'', '#383122' if state else FIELD)
-  if state:
-   im=Image.open(A/fn);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,outline=AMBER,width=1);im.save(A/fn)
-  c=art(fn,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(flag,state)];parts.append(c)
- parts.append(readout(key,8,0,w-16,h,22))
+ flag=key+'__open';parts=[];opts=P[I[key]].get('options') or [];n=len(opts)
+ # Charte π : valeur neutre (OFF/NONE/BYPASS) -> ambre dès qu'on la quitte ; sinon liseré bleu.
+ neutral=bool(opts) and opts[0] in NEUTRAL
+ shut=f'picker_{w}_{h}_0.png';bitmap(shut,w,h,'',FIELD)
+ if neutral:
+  fa=f'picker_set_{w}_{h}.png'
+  if not (A/fa).exists():bitmap(fa,w,h,'','#383122');im=Image.open(A/fa);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,outline=AMBER,width=1);im.save(A/fa)
+  c=art(fa,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(flag,0)];parts.append(c)
+  c=art(shut,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(flag,0),gate(key,0,n)];parts.append(c)
+ else:
+  fb=f'picker_blue_{w}_{h}.png'
+  if not (A/fb).exists():bitmap(fb,w,h,'',FIELD);im=Image.open(A/fb);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,outline=BLUE,width=1);im.save(A/fb)
+  c=art(fb,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(flag,0)];parts.append(c)
+ fo=f'picker_{w}_{h}_1.png';bitmap(fo,w,h,'','#383122');im=Image.open(A/fo);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,outline=AMBER,width=1);im.save(A/fo)
+ c=art(fo,0,0,w,h);c['bounds']['additionalInvalidatingHandles']=[gate(flag,1)];parts.append(c)
+ parts.append(readout(key,8,0,w-16,h,SELECTOR_FONT))
  return place(local('picker'+str(len(defs)),parts,[action('Toggle Switch'),action('Toggle Switch','Enter Pressed')]),flag,x,y,w,h)
 def option(parts,key,x,y,w,h):parts.append(picker(key,key,x,y,w,h))
 def popup(parts,key,anchor):
@@ -227,7 +241,7 @@ def precise_filter(parts,x,y):
    c=place(cell,f'filterline{n}',x+12+i*6,y+22+row*96,6,96)
    c['bounds']['acceptsHWFocus']='No';parts.append(c)
  name='filter_legend.png';im=Image.new('RGB',(600,28),BG);d=ImageDraw.Draw(im)
- for xx,text,ink in [(0,'HPF > LPF',VIOLET)]:d.line((xx,14,xx+26,14),fill=ink,width=2);d.text((xx+38,14),text,font=font(18),fill=ink,anchor='lm')
+ pass  # 0.2.0 (candidat 3) : légende « HPF > LPF » retirée (pas de texte d'aide)
  im.save(A/name);parts.append(art(name,x,y+406,600,28))
 
 marker_types={}
@@ -242,6 +256,22 @@ def marker(parts,name,xkey,ykey,x,y,height,ink,ring=False):
   c=child('Slider',dict(version=3,sliderType='TrackAndThumb',direction='Horizontal',thumbImage=thumb,thumbTrackVisible=False,revealedImage=track,handleName='Data'),0,0,588,12);c['bounds']['acceptsHWFocus']='No';marker_types[name]=local('marker_'+name,[c])
  rows=65;step=height/(rows-1)
  for row in range(rows):parts.append(place(marker_types[name],xkey,x-6,y+row*step-6,588,12,[gate(ykey,rows-1-row,rows)]))
+
+# 0.2.0 (candidat 5) : point mobile sur la courbe LFO (essai Plotter abandonné : vide sur la Force).
+# X = lfoN_pos (slider invisible, même géométrie que les repères SPACE), Y = lfoN_live quantifié en lignes ;
+# caché quand le LFO est OFF. Géométrie de precise_lfo : zone utile 576 x 96 à (x+12, y+7).
+def lfo_dot(parts,j,x,y):
+ ink=GOLD if j==1 else VIOLET;thumb=f'lfo_dot_{j}.png'
+ if not (A/thumb).exists():
+  im=Image.new('RGBA',(12,12));d=ImageDraw.Draw(im);d.ellipse((1,1,10,10),fill=ink,outline='#ffffff',width=1);im.save(A/thumb)
+ track='marker_track.png'
+ if not (A/track).exists():Image.new('RGBA',(588,12)).save(A/track)
+ name=f'lfo_dot_{j}'
+ if name not in marker_types:
+  c=child('Slider',dict(version=3,sliderType='TrackAndThumb',direction='Horizontal',thumbImage=thumb,thumbTrackVisible=False,revealedImage=track,handleName='Data'),0,0,588,12);c['bounds']['acceptsHWFocus']='No';marker_types[name]=local(name,[c])
+ rows=33;step=96/(rows-1)
+ for row in range(rows):
+  c=place(marker_types[name],f'lfo{j}_pos',x+12-6,y+7+round(row*step)-6,588,12,[gate(f'lfo{j}_live',rows-1-row,rows),gate(f'lfo{j}_on',1,2)]);c['bounds']['acceptsHWFocus']='No';parts.append(c)
 
 def precise_space(parts,x,y,motion=False):
  height=256 if motion else 384;tileh=8 if motion else 12;pad=7 if motion else 12;boxh=270 if motion else 410
@@ -349,12 +379,13 @@ for page,name in enumerate(PAGES):
  elif page==2:
   parts.append(title('AMPLITUDE',20,72));native_envelope(parts,'amp',20,114,600,176);parts.append(title('FILTER ENVELOPE',20,318));native_envelope(parts,'filter',20,360,600,176);dialgrid(parts,page_keys[page])
  elif page==3:
-  parts.append(picker('filter_model','FILTER CHARACTER',768,553,326,48));parts.append(title('HIGH PASS > LOW PASS',20,74));precise_filter(parts,20,124);parts.append(title('STATIC · SMALL SIGNAL · ENV / MOD OFF',28,488,590,18));dialgrid(parts,page_keys[page])
+  parts.append(picker('filter_model','FILTER CHARACTER',768,553,326,48));parts.append(title('HIGH PASS > LOW PASS',20,74));precise_filter(parts,20,124);dialgrid(parts,page_keys[page])
  elif page==4:
   # Both LFOs share one page, with independent shape and clock selectors.
   for j,y in [(1,72),(2,328)]:
    parts.append(title('LFO '+str(j),20,y,82,22));parts.append(toggle(f'lfo{j}_on','ON',104,y,100,42));parts.append(picker(f'lfo{j}_wave','WAVE',214,y,400,42));precise_lfo(parts,j,20,y+56)
    parts.append(picker(f'lfo{j}_sync','SYNC',20,y+180,166,44));parts.append(picker(f'lfo{j}_reset','RESET',198,y+180,166,44))
+   lfo_dot(parts,j,20,y+56)  # 0.2.0 (candidat 5) : point mobile sur la courbe
   dialgrid(parts,page_keys[page])
   # Deeper waveform controls on native subtabs, all persisted with the preset.
  elif page==5:
@@ -395,8 +426,47 @@ for j in [1,2]:
   # These two controls have real DSP meanings; unused reserved extras stay hidden.
   parts.append(dial(f'lfo{j}_extra{k}', 'WIDTH / STEP / LENGTH' if k==0 else 'EVOLVE / BOUNCE',20+k*620,80,600,112))
  precise_lfo(parts,j,320,218)
+ lfo_dot(parts,j,320,218)  # 0.2.0 (candidat 6) : point mobile aussi sur la page SHAPE
  for k in range(8):parts.append(dial(f'lfo{j}_c{k}',f'CURVE {k+1}',20+(k%4)*310,372+(k//4)*118,296,108))
  native=local(f'lfoextra{j}',parts);tabs.append(dict(version=3,tabName=f'LFO {j} SHAPE',fnKeyIndex=4,fnKeySubIndex=j,qlinkBoundsData=['0 0 0 0'],componentName=native,initialSize='0 0 1280 628',scale=1.))
+# 0.2.0 : sélecteur à valeur neutre (OFF) : ambre dès qu'il quitte OFF, comme dans πSyrinG (charte π).
+def amber_picker(key,x,y,w,h):
+ flag=key+'__open';n=len(P[I[key]]['options'])
+ fa=f'picker_amber_{w}_{h}.png'
+ if not (A/fa).exists():
+  im=Image.new('RGB',(w,h),BG);ImageDraw.Draw(im).rounded_rectangle((1,1,w-2,h-2),radius=9,fill='#383122',outline=AMBER,width=2);im.save(A/fa)
+ fn=f'picker_{w}_{h}_0.png';bitmap(fn,w,h,'',FIELD)
+ when=[gate(key,0,n),gate(flag,0)];base=art(fn,0,0,w,h);base['bounds']['additionalInvalidatingHandles']=list(when)
+ lo=readout(key,8,0,w-16,h,SELECTOR_FONT);lo['bounds']['additionalInvalidatingHandles']=list(when)
+ parts=[art(fa,0,0,w,h),readout(key,8,0,w-16,h,SELECTOR_FONT,ink='ffc7aa6d'),base,lo]
+ return place(local('picker'+str(len(defs)),parts,[action('Toggle Switch'),action('Toggle Switch','Enter Pressed')]),flag,x,y,w,h)
+# 0.2.0 : page ARP (7e onglet), même disposition que l'ARP de πSyrinG, charte π.
+parts=[art('background.png',0,0,1280,628),title('ARPEGGIATOR',20,8,1240,20)]
+for j,(key,name) in enumerate([('arp_mode','ARP'),('arp_rate','RATE'),('arp_repeats','REPEATS'),('arp_retrig','RETRIG')]):
+ x=20+j*262;parts.append(title(name,x,56,250,20));parts.append(amber_picker(key,x,88+4,250,48) if key in ('arp_mode','arp_retrig') else picker(key,name,x,88,250,56))
+parts.append(title('LATCH',1068,56,192,20));parts.append(toggle('arp_latch','LATCH',1068,88,192,56))
+for j,key in enumerate(['arp_octaves','arp_gate','arp_chance','arp_offset']):parts.append(dial(key,P[I[key]]['name'],20+j*312,190,300,150))
+anchors={}
+for c in parts:
+ for remap in c['handle remapping']['map']:
+  key=P[int(remap['value'].split()[-1])]['key']
+  if key.endswith('__open'):anchors.setdefault(key[:-6],c)
+for key,anchor in anchors.items():popup(parts,key,anchor)
+native=local('arp_page',parts);tabs.append(dict(version=3,tabName='ARP',fnKeyIndex=6,fnKeySubIndex=0,qlinkBoundsData=['0 0 0 0'],componentName=native,initialSize='0 0 1280 628',scale=1.))
+# 0.2.0 (candidat 6) : page FX (8e onglet) dans l'ordre du signal — DELAY (Dub Station) puis REVERB (Tidal Verb).
+# Charte π : SYNC/FREE et TYPE n'ont pas de valeur neutre -> liseré bleu. LEVEL 0 = effet coupé.
+parts=[art('background.png',0,0,1280,628),title('EFFECTS',20,8,1240,20)]
+parts.append(title('DELAY',20,60,240,22));parts.append(toggle('dub_sync','SYNC',20,96,240,56))
+for j,(key,name) in enumerate([('dub_time','TIME'),('dub_feedback','FEEDBACK'),('dub_filter','FILTER'),('dub_level','LEVEL')]):parts.append(dial(key,name,280+j*248,60,236,130))
+parts.append(title('REVERB',20,236,240,22));parts.append(picker('tv_type','TYPE',20,272,240,56))
+for j,(key,name) in enumerate([('tv_decay','DECAY'),('tv_live','LIVELINESS'),('tv_warmth','WARMTH'),('tv_level','LEVEL')]):parts.append(dial(key,name,280+j*248,236,236,130))
+anchors={}
+for c in parts:
+ for remap in c['handle remapping']['map']:
+  key=P[int(remap['value'].split()[-1])]['key']
+  if key.endswith('__open'):anchors.setdefault(key[:-6],c)
+for key,anchor in anchors.items():popup(parts,key,anchor)
+native=local('fx_page',parts);tabs.append(dict(version=3,tabName='FX',fnKeyIndex=7,fnKeySubIndex=0,qlinkBoundsData=['0 0 0 0'],componentName=native,initialSize='0 0 1280 628',scale=1.))
 J={'pageData':{'version':1,'info':{'version':1,'type':'CompleteDescription'},'componentDefinitions':{'version':1,'importFiles':['/usr/share/Akai/Content/Synths/Generic/Generic Knob Overlay.json','/usr/share/Akai/Content/Synths/Generic/Generic Menu Overlay.json'],'localComponentDefinitions':defs},'tabs':tabs}}
 # Passive single-leaf graph wrappers need no separate native component instance.
 # Keep leaf geometry, filmstrip and parameter remapping exactly unchanged.
@@ -422,8 +492,16 @@ for j in [1,2]:
  keys=[f'lfo{j}_extra{k}' for k in range(2)]+[f'lfo{j}_c{k}' for k in range(8)]
  for physical,key in zip([13,9,5,1,14,10,6,2,15,11,7,3,16,12,8,4],keys):mapping[f'Q-Link {physical}']=I[key]
  ql.append({'Tab':5,'SubTab':j+1,'Bank Direction':'Column','Q-Links':mapping})
+# 0.2.0 : Q-Links de la page ARP = ses quatre potentiomètres, dans l'ordre de l'écran.
+mapping={f'Q-Link {i}':-1 for i in range(1,17)}
+for physical,key in zip([13,9,5,1],['arp_octaves','arp_gate','arp_chance','arp_offset']):mapping[f'Q-Link {physical}']=I[key]
+ql.append({'Tab':7,'SubTab':1,'Bank Direction':'Column','Q-Links':mapping})
+# 0.2.0 (candidat 6) : Q-Links de la page FX = DELAY (1-4) puis REVERB (5-8), dans l'ordre de l'écran.
+mapping={f'Q-Link {i}':-1 for i in range(1,17)}
+for physical,key in zip([13,9,5,1,14,10,6,2],['dub_time','dub_feedback','dub_filter','dub_level','tv_decay','tv_live','tv_warmth','tv_level']):mapping[f'Q-Link {physical}']=I[key]
+ql.append({'Tab':8,'SubTab':1,'Bank Direction':'Column','Q-Links':mapping})
 for name in ['Q-Links.json','Q-Links - 8by1.json','Q-Links - 4by4.json']:(A/name).write_text(json.dumps({'version':4,'info':{'version':1,'type':'CompleteDescription'},'Screen Mode Q-Links':{'version':4,'map':ql},'Program Mode Q-Links':ql[0]['Q-Links']},indent=2))
-(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.1.3.0</version></plugincontent>\n')
+(OUT/'version.xml').write_text('<plugincontent version="1.0"><identifier>Timo.vst.πmorph</identifier><version>0.2.0.0</version></plugincontent>\n')
 # Pad every small regular Image, including LFO headers/toggles/cycle indicators,
 # MOD row numbers and compact panel choices. Keep native clipping geometry intact.
 padded=[]
@@ -436,4 +514,4 @@ for name in sorted(regular_art):
  canvas.paste(im,(0,0));assert canvas.crop((0,0,w,h)).tobytes()==im.tobytes();canvas.save(path)
  padded.append(dict(image=name,old_size=[w,h],new_size=list(canvas.size)))
 (B/'build/regular-image-padding.json').write_text(json.dumps(padded,indent=2)+'\n')
-print('Generated six native pages + two LFO shape subpages;',len(defs),'components;',len(list(A.glob('*.png'))),'cached images')
+print('Generated six native pages + two LFO shape subpages + ARP + FX pages;',len(defs),'components;',len(list(A.glob('*.png'))),'cached images')
