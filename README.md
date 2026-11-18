@@ -27,8 +27,7 @@ Each voice moves through a wavetable space using a path and an elliptical orbit.
 
 | Device generation | Download |
 | --- | --- |
-| **Gen1 / Force** — ARM32 | [piMorpH-0.2.0-vst2-armv7.zip](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.2.0/piMorpH-0.2.0-vst2-armv7.zip) |
-| **Gen2** — ARM64 (not tested on hardware) | [piMorpH-0.2.0-vst2-aarch64.zip](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.2.0/piMorpH-0.2.0-vst2-aarch64.zip) |
+| **Gen1 / Force** (ARM32) and **Gen2** (ARM64, not tested on hardware) | [piMorpH-0.2.0-mpc-sdk.zip](https://github.com/timomacquis/piMorpH-MPC/releases/download/v0.2.0/piMorpH-0.2.0-mpc-sdk.zip) |
 
 Unzip, copy the folder **`Timo - VST - πMorpH`** into **`VST2 Plugins`** at the root of a drive (User Memory: `/sdcard/VST2 Plugins`), then restart MPC. This is the installation method defined by Akai's plugin SDK: no installer script, no `Synths` folder, no MPC.settings entry. Requires MPC OS 3.10.1+ with Enhancements and External Plugin Support enabled. See [Installation and removal](docs/INSTALLATION.md).
 

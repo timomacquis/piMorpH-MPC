@@ -6,14 +6,14 @@
 
 - MPC OS **3.10.1 or later**.
 - **Preferences → Enhancements (Beta) → Enable Enhancements** and **External Plugin Support** switched on.
-- Gen1 / Force (ARM32): the `-vst2-armv7.zip` package. Gen2 (ARM64): the `-vst2-aarch64.zip` package, see [Gen2 guide](INSTALLATION-GEN2.md) — not tested on Gen2 hardware.
+- One package for both generations, `-mpc-sdk.zip`: its folder holds the Gen1 / Force binary (ARM32, `file32` in `plugin.json`) and the Gen2 binary (ARM64, `file64`). Gen2 (ARM64): the same package, see [Gen2 guide](INSTALLATION-GEN2.md) — not tested on Gen2 hardware.
 - A drive that allows executable plugins. The internal User Memory always does; removable drives may be mounted `noexec`.
 
 ## Install or update
 
 1. Save your project.
 2. Download the ZIP for your device and check it against its `.sha256` file.
-3. Unzip it. It contains the folder **`Timo - VST - πMorpH`** and `INSTALL.txt`.
+3. Unzip it. It contains the folder **`Timo - VST - πMorpH`** (with `INSTALL.txt` inside).
 4. Copy that folder into **`VST2 Plugins`** at the root of a drive. On the internal User Memory this is `/sdcard/VST2 Plugins/`. When updating, replace the previous folder entirely.
 5. Restart the MPC app (or the device). πMorpH appears in the plugin browser under **External Plugins**.
 
